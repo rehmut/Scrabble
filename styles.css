@@ -512,27 +512,103 @@ button:not(:disabled):hover {
 @media (max-width: 1100px) {
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr; /* Stack panel on top/bottom */
   }
 
   .panel {
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 16px;
+    flex-direction: row; /* Horizontal layout for player list on mobile */
+    align-items: center;
+    overflow-x: auto; /* Scroll if many players */
+    gap: 16px;
+  }
+  
+  .panel-header {
+    min-width: 120px;
+  }
+  
+  .player-list {
+    flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+  }
+  
+  .history, .bag-info {
+    display: none; /* Hide history/bag on mobile to save space, maybe add toggle later */
+  }
+
+  .main-area {
+    flex-direction: column; /* Stack board and rack vertically */
+    align-items: center;
+    padding: 16px 8px; /* Less padding on mobile */
+    gap: 16px;
+  }
+  
+  .rack-wrapper {
+    max-width: 100%; /* Full width rack on mobile */
+    order: 2; /* Ensure rack is below board or above depending on preference. Default is below. */
   }
 }
 
 @media (max-width: 720px) {
   .board-grid {
-    grid-template-columns: repeat(15, minmax(28px, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(15, minmax(20px, 1fr)); /* Smaller minimum cell size */
+    gap: 2px; /* Tighter gap */
+    width: 100%;
+  }
+
+  .board-cell {
+    min-height: 20px; /* Allow cells to be smaller */
+    padding: 2px;
+    font-size: 0.8rem;
+  }
+  
+  .board-cell-letter {
+    font-size: 0.85rem; /* Smaller letters */
+  }
+  
+  .board-cell-score {
+    font-size: 0.5rem; /* Smaller score */
   }
 
   .tile-btn {
-    min-width: 44px;
-    min-height: 44px; /* Adjusted to maintain quadratic shape */
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1.1rem;
+    padding: 6px;
+  }
+  
+  .tile-btn span {
+    font-size: 0.6rem;
   }
 
   .rack-actions {
-    flex-direction: column;
+    flex-direction: row; /* Keep buttons side-by-side if possible */
+    justify-content: center;
+  }
+  
+  .rack-actions button {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    flex: 1; /* Stretch buttons */
+  }
+}
+
+@media (max-width: 480px) {
+  .board-wrapper {
+    padding: 8px; /* Minimal padding around board */
+    border-radius: 12px;
+  }
+  
+  .board-grid {
+     /* Ensure it fits on very narrow screens */
+     gap: 1px;
+  }
+  
+  .board-cell::before {
+    font-size: 0.45rem; /* Tiny labels */
   }
 }
 

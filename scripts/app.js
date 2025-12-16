@@ -1,3 +1,16 @@
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyB8PbZxNZY7v-NO76b2gVHcOQMcN69FLsQ",
+  authDomain: "scrabble-421be.firebaseapp.com",
+  projectId: "scrabble-421be",
+  storageBucket: "scrabble-421be.firebasestorage.app",
+  messagingSenderId: "229843683462",
+  appId: "1:229843683462:web:d57bef461181d44fe26907",
+  measurementId: "G-Z2KFXMMZM6",
+  databaseURL: "https://scrabble-421be-default-rtdb.europe-west1.firebasedatabase.app/"
+};
+
+// --- GAME CONSTANTS ---
 const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
 const BINGO_BONUS = 50;
@@ -41,28 +54,27 @@ const GERMAN_TILES = [
 
 const BLANK_CHOICES = ['A','Ä','B','C','D','E','F','G','H','I','J','K','L','M','N','O','Ö','P','Q','R','S','T','U','Ü','V','W','X','Y','Z'];
 
-
 const FALLBACK_WORDS = [
-  "aber", "abend", "abfahrt", "abgabe", "abitur", "ablauf", "abschied", "absicht", "acht", "achtung", "adresse", "\u00c3\u00a4hnlich",
+  "aber", "abend", "abfahrt", "abgabe", "abitur", "ablauf", "abschied", "absicht", "acht", "achtung", "adresse",
   "aktion", "alltag", "als", "alt", "am", "amerika", "amt", "analyse", "anfang", "angebot", "angst", "ankunft",
-  "anlage", "antwort", "anwalt", "arbeit", "archiv", "arena", "arzt", "aspekt", "atem", "augenblick", "augenlid", "au\u00c3\u0178er",
+  "anlage", "antwort", "anwalt", "arbeit", "archiv", "arena", "arzt", "aspekt", "atem", "augenblick", "augenlid", "außer",
   "ausbildung", "ausdruck", "ausflug", "ausgabe", "ausgleich", "auskunft", "ausland", "auslauf", "auswahl", "auto", "bahnhof", "ball",
   "baum", "becher", "bedarf", "befehl", "begriff", "beispiel", "beitrag", "bekannt", "beleg", "bereich", "berg", "bericht",
   "berlin", "beruf", "bescheid", "besitz", "bestellung", "bewegung", "bewohner", "bewusstsein", "bezirk", "bibliothek", "blick", "boden",
-  "bote", "brief", "brille", "br\u00c3\u00bccke", "bruder", "b\u00c3\u00bccher", "b\u00c3\u00bcro", "b\u00c3\u00bcrger", "chef", "chor", "computer", "container",
+  "bote", "brief", "brille", "brücke", "bruder", "bücher", "büro", "bürger", "chef", "chor", "computer", "container",
   "couch", "dach", "dame", "dank", "datenbank", "dauer", "deckung", "dekan", "denken", "deutsche", "dialog", "dienst",
   "dinner", "disziplin", "dokument", "dorf", "dosis", "druck", "duft", "durchgang", "durst", "eben", "ebene", "ecke",
   "effekt", "ehe", "ehrgeiz", "ei", "eifer", "eimer", "einblick", "eindruck", "einheit", "einsatz", "eintrag", "element",
   "empfang", "ende", "energie", "engel", "entwurf", "erfahrung", "erfolg", "ergebnis", "erhebung", "erinnerung", "erlebnis", "ermittlung",
-  "ernte", "erz\u00c3\u00a4hlung", "essen", "etage", "etappe", "ethik", "etikett", "farbe", "faktor", "familie", "fang", "farm",
+  "ernte", "erzählung", "essen", "etage", "etappe", "ethik", "etikett", "farbe", "faktor", "familie", "fang", "farm",
   "fasching", "fassung", "faust", "fehler", "feier", "feld", "fenster", "ferien", "ferse", "fest", "fieber", "figur",
   "film", "filter", "firma", "flamme", "flasche", "fleck", "fliege", "flotte", "fluss", "folge", "form", "fortschritt",
-  "foto", "frage", "freiheit", "freitag", "fremde", "freund", "friedhof", "friseur", "frucht", "fr\u00c3\u00bchst\u00c3\u00bcck", "fund", "funktion",
-  "gabel", "gabe", "gala", "garten", "gas", "geb\u00c3\u00a4ck", "gebirge", "gebot", "gebrauch", "geburt", "gedanke", "gefahr",
-  "gegend", "gegner", "geh\u00c3\u00b6r", "geist", "gel\u00c3\u00a4nde", "geld", "geldbeutel", "gelenk", "gelingen", "gel\u00c3\u00bcbde", "gem\u00c3\u00a4lde", "gemeinschaft",
-  "gem\u00c3\u00bcse", "genau", "genuss", "ger\u00c3\u00a4t", "gericht", "gesetz", "gesicht", "gespr\u00c3\u00a4ch", "gestalt", "gestern", "gesundheit", "getr\u00c3\u00a4nk",
-  "gewicht", "gewohnheit", "gipfel", "glanz", "glaube", "gleich", "gl\u00c3\u00bcck", "gott", "graben", "grafik", "grau", "grenze",
-  "griff", "grill", "grund", "gruppe", "g\u00c3\u00bcnstig", "gutachten", "haar", "haben", "hafen", "halbzeit", "halle", "hals",
+  "foto", "frage", "freiheit", "freitag", "fremde", "freund", "friedhof", "friseur", "frucht", "frühstück", "fund", "funktion",
+  "gabel", "gabe", "gala", "garten", "gas", "gebäck", "gebirge", "gebot", "gebrauch", "geburt", "gedanke", "gefahr",
+  "gegend", "gegner", "gehör", "geist", "gelände", "geld", "geldbeutel", "gelenk", "gelingen", "gelübde", "gemälde", "gemeinschaft",
+  "gemüse", "genau", "genuss", "gerät", "gericht", "gesetz", "gesicht", "gespräch", "gestalt", "gestern", "gesundheit", "getränk",
+  "gewicht", "gewohnheit", "gipfel", "glanz", "glaube", "gleich", "glück", "gott", "graben", "grafik", "grau", "grenze",
+  "griff", "grill", "grund", "gruppe", "günstig", "gutachten", "haar", "haben", "hafen", "halbzeit", "halle", "hals",
   "handlung", "handwerk", "hang", "hauch", "hauptstadt", "haus", "haushalt", "haut", "heft", "heim", "heilung", "heimat",
   "heizung", "held", "hell", "hilfe", "himmel", "hinweis", "hof", "holz", "hochhaus", "hochzeit", "hocker", "hobby",
   "hofladen", "holung", "horizont", "hotel", "hunger", "idee", "idylle", "illusion", "impuls", "index", "info", "ingenieur",
@@ -70,34 +82,34 @@ const FALLBACK_WORDS = [
   "job", "journal", "jubel", "junge", "jury", "kaffee", "kamin", "kanal", "kandidat", "kantine", "karte", "kasten",
   "katalog", "katze", "kauf", "keller", "kenner", "kenntnis", "kerze", "kette", "kilometer", "kino", "kiosk", "kiste",
   "kittel", "klinge", "klinik", "klima", "klingel", "kloster", "knapp", "knochen", "knopf", "koch", "kollege", "kolumne",
-  "komitee", "komfort", "kommune", "konferenz", "konflikt", "konto", "konzept", "kopf", "kopie", "korn", "k\u00c3\u00b6rper", "kost",
-  "kraft", "kragen", "krankheit", "krimi", "krise", "krone", "k\u00c3\u00bcche", "kunde", "kunst", "kurve", "kurs", "kurz",
-  "k\u00c3\u00bcste", "labor", "lage", "lampe", "land", "lassen", "laune", "lauf", "laut", "leben", "lehrer", "leistung",
+  "komitee", "komfort", "kommune", "konferenz", "konflikt", "konto", "konzept", "kopf", "kopie", "korn", "körper", "kost",
+  "kraft", "kragen", "krankheit", "krimi", "krise", "krone", "küche", "kunde", "kunst", "kurve", "kurs", "kurz",
+  "küste", "labor", "lage", "lampe", "land", "lassen", "laune", "lauf", "laut", "leben", "lehrer", "leistung",
   "leiter", "lektor", "lenkung", "lexikon", "licht", "liebe", "lied", "liga", "linie", "liste", "liter", "lob",
-  "logik", "l\u00c3\u00b6sung", "luft", "lust", "luxus", "magazin", "maler", "mangel", "markt", "maschine", "ma\u00c3\u0178", "material",
+  "logik", "lösung", "luft", "lust", "luxus", "magazin", "maler", "mangel", "markt", "maschine", "maß", "material",
   "maurer", "medizin", "meer", "meister", "meldung", "menge", "mensch", "menschen", "messer", "metall", "miete", "milch",
   "minute", "mission", "mittag", "mittel", "monat", "moment", "montag", "monitor", "motor", "musik", "mutation", "muster",
   "mythos", "nachbar", "nachricht", "nachschub", "nacht", "nadel", "nahe", "name", "nation", "natur", "nebel", "neben",
   "neigung", "nein", "netz", "neugier", "niveau", "notiz", "nummer", "nutzen", "oase", "oberteil", "objekt", "obst",
-  "ofen", "offerte", "offizier", "ohne", "\u00c3\u00b6konomie", "olympia", "oper", "opfer", "option", "ordnung", "ort", "paket",
+  "ofen", "offerte", "offizier", "ohne", "ökonomie", "olympia", "oper", "opfer", "option", "ordnung", "ort", "paket",
   "palast", "panorama", "papier", "parade", "park", "partner", "pass", "pause", "pension", "person", "pfeil", "pflanze",
-  "phase", "piano", "pilz", "plan", "plakat", "pl\u00c3\u00a4ne", "plastik", "platz", "plenum", "poesie", "polizei", "portion",
+  "phase", "piano", "pilz", "plan", "plakat", "pläne", "plastik", "platz", "plenum", "poesie", "polizei", "portion",
   "position", "post", "praxis", "preis", "prinzip", "prozess", "puls", "pult", "punkt", "quecksilber", "quote", "rad",
   "radio", "rahmen", "rand", "rasen", "ration", "raum", "raupe", "reform", "regel", "regen", "reich", "reise",
   "reiter", "reiz", "rekord", "reparatur", "residenz", "restaurant", "resultat", "rhythmus", "richter", "riff", "ring", "risiko",
   "ritter", "rolle", "roman", "rosen", "route", "rucksack", "ruhe", "runde", "saal", "saft", "sage", "saison",
   "salat", "salz", "samt", "satz", "szene", "schalter", "schatten", "schatz", "schiff", "schlauch", "schloss", "schluss",
-  "schmerz", "schnee", "schnur", "schrank", "schritt", "schuh", "sch\u00c3\u00bcler", "schutz", "schwester", "see", "seele", "segel",
+  "schmerz", "schnee", "schnur", "schrank", "schritt", "schuh", "schüler", "schutz", "schwester", "see", "seele", "segel",
   "segen", "sektor", "seite", "sekunde", "selbst", "semester", "sendung", "sensor", "serie", "service", "sessel", "sicherheit",
   "sicht", "signal", "silbe", "silber", "sinn", "sirene", "sitte", "skala", "skizze", "sofa", "sohn", "solide",
-  "sommer", "sonne", "sound", "spa\u00c3\u0178", "spalte", "spannung", "sparplan", "spiegel", "spiel", "spitze", "sport", "sprache",
+  "sommer", "sonne", "sound", "spaß", "spalte", "spannung", "sparplan", "spiegel", "spiel", "spitze", "sport", "sprache",
   "sprecher", "sprung", "stadt", "stall", "stand", "start", "statistik", "staub", "stein", "stern", "steuerrad", "stimme",
-  "stoff", "stolz", "st\u00c3\u00b6rfall", "stra\u00c3\u0178e", "strick", "strom", "stube", "stufe", "sturm", "stute", "studium", "studio",
-  "stunde", "st\u00c3\u00bcck", "system", "tabelle", "takt", "talent", "tanz", "tasche", "taste", "technik", "teich", "teil",
+  "stoff", "stolz", "störfall", "straße", "strick", "strom", "stube", "stufe", "sturm", "stute", "studium", "studio",
+  "stunde", "stück", "system", "tabelle", "takt", "talent", "tanz", "tasche", "taste", "technik", "teich", "teil",
   "telefon", "theater", "thema", "therme", "ticket", "tisch", "titel", "ton", "tonne", "tor", "tradition", "trainer",
   "traum", "treffer", "trend", "treppe", "trick", "truppe", "tuch", "turm", "ufer", "uhr", "umsatz", "umwelt",
   "umfang", "unfall", "unfug", "uniform", "urlaub", "ursprung", "urteil", "vater", "verband", "verbrauch", "verein", "verfassung",
-  "verhalten", "verkauf", "verlauf", "verh\u00c3\u00a4ltnis", "verlag", "verlust", "vermerk", "verrat", "vertrag", "verwaltung", "versorgung", "versuch",
+  "verhalten", "verkauf", "verlauf", "verhältnis", "verlag", "verlust", "vermerk", "verrat", "vertrag", "verwaltung", "versorgung", "versuch",
   "verkehr", "version", "viertel", "villa", "vision", "vogel", "vorbild", "vorgang", "vorhaben", "vorlage", "vormittag", "vorrat",
   "vorteil", "vortrag", "wahl", "wandel", "wanne", "ware", "warnung", "wartung", "wasser", "weg", "wehr", "weide",
   "weil", "welt", "wert", "wetter", "wiese", "wille", "wind", "winkel", "winter", "wirkung", "wissen", "wohnung",
@@ -107,24 +119,33 @@ const FALLBACK_WORDS = [
 
 const MULTIPLIER_MATRIX = buildMultiplierMatrix();
 
-const state = {
+// --- STATE MANAGEMENT ---
+const localState = {
+  placements: new Map(),
+  selectedRackIndex: null,
+  exchangeSelection: new Set(),
+  dictionary: new Set(),
+  pendingBlank: null,
+  myPlayerId: localStorage.getItem('scrabble_player_id') || `P_${Math.random().toString(36).substr(2, 9)}`,
+  gameId: null,
+  isMyTurn: false
+};
+localStorage.setItem('scrabble_player_id', localState.myPlayerId);
+
+let gameState = {
   board: [],
   bag: [],
   players: [],
   currentPlayerIndex: 0,
-  placements: new Map(),
-  selectedRackIndex: null,
-  dictionary: new Set(),
-  dictionarySource: 'fallback',
   history: [],
   passes: 0,
   turn: 1,
   nextTileId: 1,
   gameOver: false,
-  pendingBlank: null,
-  exchangeSelection: new Set()
+  winner: null
 };
 
+// --- DOM ELEMENTS ---
 const elements = {
   board: document.getElementById('board'),
   rack: document.getElementById('rack'),
@@ -139,10 +160,11 @@ const elements = {
   passBtn: document.getElementById('passBtn'),
   bagCount: document.getElementById('bagCount'),
   historyList: document.getElementById('historyList'),
-  startOverlay: document.getElementById('startOverlay'),
-  playerForm: document.getElementById('playerForm'),
-  playerInputList: document.getElementById('playerInputList'),
-  addPlayerField: document.getElementById('addPlayerField'),
+  lobbyOverlay: document.getElementById('lobbyOverlay'),
+  joinGameBtn: document.getElementById('joinGameBtn'),
+  lobbyPlayerName: document.getElementById('lobbyPlayerName'),
+  lobbyGameId: document.getElementById('lobbyGameId'),
+  lobbyStatus: document.getElementById('lobbyStatus'),
   blankModal: document.getElementById('blankModal'),
   blankChoices: document.getElementById('blankChoices'),
   exchangeModal: document.getElementById('exchangeModal'),
@@ -152,49 +174,15 @@ const elements = {
   dictionaryChip: document.getElementById('dictionaryChip')
 };
 
-// Initialize dictionary
-const localDictionary = new Set();
+// --- FIREBASE REFERENCES ---
+let db, gameRef;
 
-if (window.GERMAN_DICTIONARY && Array.isArray(window.GERMAN_DICTIONARY)) {
-  // Use the full local dictionary if available
-  window.GERMAN_DICTIONARY.forEach(word => localDictionary.add(word));
-  state.dictionary = localDictionary;
-  state.dictionarySource = 'local-full';
-  elements.dictionaryChip.textContent = `Wörterbuch: ${state.dictionary.size.toLocaleString('de-DE')} Einträge`;
-  // Clear the global array to free up some memory if possible (though V8 might keep it)
-  window.GERMAN_DICTIONARY = null; 
-} else {
-  // Use fallback words
-  FALLBACK_WORDS.forEach(word => {
-    const normalized = normalizeWord(word);
-    if (normalized) localDictionary.add(normalized);
-  });
-  state.dictionary = localDictionary;
-  state.dictionarySource = 'fallback';
-  elements.dictionaryChip.textContent = `Fallback-Wörterbuch: ${state.dictionary.size.toLocaleString('de-DE')} Einträge`;
-
-  // Only load remote if we don't have the full local one
-  loadRemoteDictionary().then(result => {
-    if (result.source === 'remote') {
-      state.dictionary = result.set;
-      state.dictionarySource = result.source;
-      elements.dictionaryChip.textContent = `Vollständiges Wörterbuch: ${result.set.size.toLocaleString('de-DE')} Einträge`;
-    }
-  }).catch(() => {
-    console.log('Remote dictionary load failed, staying with fallback.');
-  });
-}
-
-setupPlayerForm();
-buildBlankChoices();
+// --- INITIALIZATION ---
+initDictionary();
 bindEvents();
-state.board = createBoard();
-renderBoard();
-renderHistory();
-updateControls();
-setStatus('Bereit für ein neues Spiel.', 'info');
 
 function bindEvents() {
+  elements.joinGameBtn.addEventListener('click', handleJoinGame);
   elements.rack.addEventListener('click', handleRackClick);
   elements.board.addEventListener('click', handleBoardClick);
   elements.submitBtn.addEventListener('click', handleSubmitMove);
@@ -202,80 +190,130 @@ function bindEvents() {
   elements.shuffleBtn.addEventListener('click', handleShuffleRack);
   elements.exchangeBtn.addEventListener('click', openExchangeModal);
   elements.passBtn.addEventListener('click', handlePass);
-  elements.playerForm.addEventListener('submit', handlePlayerFormSubmit);
-  elements.addPlayerField.addEventListener('click', () => addPlayerInput(''));
   elements.blankModal.querySelector('[data-close-blank]').addEventListener('click', closeBlankModal);
   elements.exchangeModal.querySelector('[data-close-exchange]').addEventListener('click', closeExchangeModal);
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
 }
 
-function handlePlayerFormSubmit(event) {
-  event.preventDefault();
-  const inputs = Array.from(elements.playerInputList.querySelectorAll('input'));
-  const names = inputs
-    .map((input, idx) => input.value.trim() || `Spieler ${idx + 1}`)
-    .filter(Boolean);
-  if (names.length < 2) {
-    setStatus('Bitte mindestens zwei Spieler eintragen.', 'error');
+// --- LOBBY & FIREBASE CONNECT ---
+function handleJoinGame() {
+  const name = elements.lobbyPlayerName.value.trim();
+  const gameId = elements.lobbyGameId.value.trim().toUpperCase();
+
+  if (!name || !gameId) {
+    elements.lobbyStatus.textContent = 'Bitte Name und Spiel-ID eingeben.';
     return;
   }
-  if (names.length > 4) {
-    setStatus('Maximal vier Spieler sind erlaubt.', 'error');
+  if (typeof firebase === 'undefined') {
+    elements.lobbyStatus.textContent = 'Fehler: Firebase nicht geladen.';
     return;
   }
-  startGame(names, state.dictionary, state.dictionarySource);
-}
 
-function startGame(names, dictionary, source) {
-  if (!dictionary || !dictionary.size) {
-    setStatus('Wörterbuch noch nicht bereit. Bitte versuche es erneut.', 'error');
-    return;
-  }
-  state.dictionary = dictionary;
-  state.dictionarySource = source || state.dictionarySource;
-  state.players = names.map((name, idx) => ({ id: `P${idx + 1}`, name, score: 0, rack: [] }));
-  state.currentPlayerIndex = 0;
-  state.board = createBoard();
-  state.bag = buildBag();
-  state.placements.clear();
-  state.selectedRackIndex = null;
-  state.history = [];
-  state.passes = 0;
-  state.turn = 1;
-  state.gameOver = false;
-  state.pendingBlank = null;
-  state.exchangeSelection.clear();
-  state.players.forEach(player => drawTiles(player));
-  elements.startOverlay.classList.remove('is-visible');
-  recordHistory({ message: 'Neues Spiel gestartet.' });
-  renderEverything('Viel Erfolg! Das Spiel beginnt.');
-}
+  elements.lobbyStatus.textContent = 'Verbinde …';
+  localState.gameId = gameId;
 
-function renderEverything(message) {
-  renderBoard();
-  renderRack();
-  renderPlayers();
-  renderHistory();
-  updateControls();
-  updateTurnInfo();
-  if (message) {
-    setStatus(message, 'info');
+  try {
+    if (!firebase.apps.length) {
+       firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.database();
+    gameRef = db.ref(`games/${gameId}`);
+
+    gameRef.once('value').then((snapshot) => {
+      if (snapshot.exists()) {
+        joinExistingGame(snapshot.val(), name);
+      } else {
+        createNewGame(name);
+      }
+    }).catch(err => {
+      console.error(err);
+      elements.lobbyStatus.textContent = 'Verbindungsfehler. Check Console.';
+    });
+  } catch (e) {
+    console.error(e);
+    elements.lobbyStatus.textContent = 'Init Error: ' + e.message;
   }
 }
 
-function drawTiles(player) {
-  while (player.rack.length < RACK_SIZE && state.bag.length) {
-    player.rack.push(state.bag.pop());
+function joinExistingGame(data, playerName) {
+  const players = data.players || [];
+  const existingPlayer = players.find(p => p.id === localState.myPlayerId);
+
+  if (existingPlayer) {
+    startGameListener();
+  } else {
+    if (players.length >= 4) { elements.lobbyStatus.textContent = 'Spiel voll.'; return; }
+    if (data.gameOver) { elements.lobbyStatus.textContent = 'Spiel beendet.'; return; }
+    
+    const newPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
+    const bag = [...(data.bag || [])];
+    drawTilesForPlayer(newPlayer, bag);
+    
+    players.push(newPlayer);
+    gameRef.update({ players, bag }).then(startGameListener);
   }
 }
 
-function buildBag() {
+function createNewGame(playerName) {
+  const idRef = { value: 1 };
+  const bag = buildBagWithIds(idRef);
+  const initialPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
+  drawTilesForPlayer(initialPlayer, bag);
+
+  const newGameData = {
+    board: createBoard(),
+    bag: bag,
+    players: [initialPlayer],
+    currentPlayerIndex: 0,
+    history: [{ message: `Spiel gestartet von ${playerName}.` }],
+    passes: 0,
+    turn: 1,
+    nextTileId: idRef.value,
+    gameOver: false
+  };
+
+  gameRef.set(newGameData).then(startGameListener);
+}
+
+function startGameListener() {
+  elements.lobbyOverlay.classList.remove('is-visible');
+  gameRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      gameState = data;
+      // Safety checks
+      if (!gameState.players) gameState.players = [];
+      if (!gameState.bag) gameState.bag = [];
+      if (!gameState.history) gameState.history = [];
+      
+      syncLocalState();
+      renderEverything();
+    }
+  });
+}
+
+function syncLocalState() {
+  const myPlayerIndex = gameState.players.findIndex(p => p.id === localState.myPlayerId);
+  localState.isMyTurn = (myPlayerIndex === gameState.currentPlayerIndex) && !gameState.gameOver;
+  if (!localState.isMyTurn && localState.placements.size > 0) handleRecall();
+}
+
+// --- GAME LOGIC ---
+function drawTilesForPlayer(player, bag) {
+  if (!player.rack) player.rack = [];
+  while (player.rack.length < RACK_SIZE && bag.length > 0) {
+    const index = Math.floor(Math.random() * bag.length);
+    player.rack.push(bag.splice(index, 1)[0]);
+  }
+}
+
+function buildBagWithIds(idCounterRef) {
   const bag = [];
   GERMAN_TILES.forEach(tileType => {
-    for (let i = 0; i < tileType.count; i += 1) {
+    for (let i = 0; i < tileType.count; i++) {
       bag.push({
-        id: `T${state.nextTileId++}`,
+        id: `T${idCounterRef.value++}`,
         letter: tileType.letter,
         value: tileType.value,
         isBlank: Boolean(tileType.isBlank || tileType.letter === '?'),
@@ -283,20 +321,13 @@ function buildBag() {
       });
     }
   });
-  shuffle(bag);
   return bag;
 }
 
 function createBoard() {
   return Array.from({ length: BOARD_SIZE }, (_, row) => (
     Array.from({ length: BOARD_SIZE }, (_, col) => ({
-      row,
-      col,
-      letter: '',
-      value: 0,
-      tileId: null,
-      isBlank: false,
-      locked: false,
+      row, col, letter: '', value: 0, tileId: null, isBlank: false, locked: false,
       multiplier: MULTIPLIER_MATRIX[row][col]
     }))
   ));
@@ -322,32 +353,62 @@ function buildMultiplierMatrix() {
   return matrix;
 }
 
+function renderEverything() {
+  renderBoard();
+  renderRack();
+  renderPlayers();
+  renderHistory();
+  updateControls();
+  updateTurnInfo();
+  
+  if (gameState.gameOver) {
+    const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
+    setStatus(`Spiel vorbei! Sieger: ${winnerName}`, 'success');
+  } else if (localState.isMyTurn) {
+    setStatus('Du bist am Zug!', 'info');
+  } else {
+    const cur = gameState.players[gameState.currentPlayerIndex];
+    setStatus(`Warte auf ${cur ? cur.name : '...'}`, 'info');
+  }
+}
+
 function renderBoard() {
   const fragment = document.createDocumentFragment();
-  state.board.forEach((row, rowIndex) => {
+  // Safe copy for display
+  const displayBoard = gameState.board.map(row => row.map(cell => ({ ...cell })))
+  
+  localState.placements.forEach(({ row, col, tile }) => {
+    displayBoard[row][col] = {
+      ...displayBoard[row][col],
+      letter: tile.isBlank ? (tile.assignedLetter || '?') : tile.letter,
+      value: tile.value,
+      tileId: tile.id,
+      isBlank: tile.isBlank,
+      locked: false
+    };
+  });
+
+  displayBoard.forEach((row, rowIndex) => {
     row.forEach((cell, colIndex) => {
       const cellEl = document.createElement('div');
       cellEl.className = 'board-cell';
       cellEl.dataset.row = rowIndex;
       cellEl.dataset.col = colIndex;
       cellEl.dataset.label = getCellLabel(cell);
-      const { word, letter, isCenter } = cell.multiplier;
-      if (word === 2) cellEl.classList.add('cell-word2');
-      if (word === 3) cellEl.classList.add('cell-word3');
-      if (letter === 2) cellEl.classList.add('cell-letter2');
-      if (letter === 3) cellEl.classList.add('cell-letter3');
-      if (isCenter) cellEl.classList.add('cell-center');
+      
+      const m = cell.multiplier || gameState.board[rowIndex][colIndex].multiplier;
+      if (m.word === 2) cellEl.classList.add('cell-word2');
+      if (m.word === 3) cellEl.classList.add('cell-word3');
+      if (m.letter === 2) cellEl.classList.add('cell-letter2');
+      if (m.letter === 3) cellEl.classList.add('cell-letter3');
+      if (m.isCenter) cellEl.classList.add('cell-center');
+      
       if (cell.letter) {
         cellEl.classList.add('has-letter');
-        if (!cell.locked) cellEl.classList.add('new-letter');
         if (cell.locked) cellEl.classList.add('locked-letter');
-        const letterEl = document.createElement('span');
-        letterEl.className = 'board-cell-letter';
-        letterEl.textContent = cell.letter;
-        const scoreEl = document.createElement('span');
-        scoreEl.className = 'board-cell-score';
-        scoreEl.textContent = cell.value;
-        cellEl.append(letterEl, scoreEl);
+        else cellEl.classList.add('new-letter');
+        
+        cellEl.innerHTML = `<span class="board-cell-letter">${cell.letter}</span><span class="board-cell-score">${cell.value}</span>`;
       }
       fragment.appendChild(cellEl);
     });
@@ -358,27 +419,33 @@ function renderBoard() {
 
 function getCellLabel(cell) {
   if (cell.letter) return '';
-  if (cell.multiplier.word === 3) return '3W';
-  if (cell.multiplier.word === 2) return '2W';
-  if (cell.multiplier.letter === 3) return '3B';
-  if (cell.multiplier.letter === 2) return '2B';
+  const m = cell.multiplier || gameState.board[cell.row][cell.col].multiplier;
+  if (m.word === 3) return '3W';
+  if (m.word === 2) return '2W';
+  if (m.letter === 3) return '3B';
+  if (m.letter === 2) return '2B';
   return '';
 }
 
+function getCurrentPlayerObj() {
+  return gameState.players.find(p => p.id === localState.myPlayerId);
+}
+
 function renderRack() {
-  const player = getCurrentPlayer();
+  const player = getCurrentPlayerObj();
   elements.rack.innerHTML = '';
-  if (!player) return;
+  if (!player || !player.rack) return;
+  
+  const placedIds = new Set(localState.placements.keys());
+  const rackTiles = player.rack.filter(t => !placedIds.has(t.id));
+
   const fragment = document.createDocumentFragment();
-  player.rack.forEach((tile, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'tile-btn';
-    if (tile.isBlank) button.classList.add('blank');
-    if (state.selectedRackIndex === index) button.classList.add('selected');
-    button.dataset.index = index;
-    button.innerHTML = `${tile.assignedLetter || tile.letter}<span>${tile.value}</span>`;
-    fragment.appendChild(button);
+  rackTiles.forEach((tile, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'tile-btn' + (tile.isBlank ? ' blank' : '') + (localState.selectedRackIndex === index ? ' selected' : '');
+    btn.dataset.index = index; 
+    btn.innerHTML = `${tile.assignedLetter || tile.letter}<span>${tile.value}</span>`;
+    fragment.appendChild(btn);
   });
   elements.rack.appendChild(fragment);
 }
@@ -386,12 +453,12 @@ function renderRack() {
 function renderPlayers() {
   elements.playerList.innerHTML = '';
   const fragment = document.createDocumentFragment();
-  state.players.forEach((player, index) => {
+  (gameState.players || []).forEach((player, index) => {
     const li = document.createElement('li');
-    if (index === state.currentPlayerIndex && !state.gameOver) li.classList.add('active');
+    if (index === gameState.currentPlayerIndex && !gameState.gameOver) li.classList.add('active');
     const name = document.createElement('span');
     name.className = 'player-name';
-    name.textContent = player.name;
+    name.textContent = player.name + (player.id === localState.myPlayerId ? ' (Du)' : '');
     const score = document.createElement('span');
     score.className = 'player-score';
     score.textContent = player.score;
@@ -399,15 +466,15 @@ function renderPlayers() {
     fragment.appendChild(li);
   });
   elements.playerList.appendChild(fragment);
-  const player = getCurrentPlayer();
-  elements.currentPlayerLabel.textContent = player ? player.name : '—';
-  elements.bagCount.textContent = state.bag.length.toString();
+  const cur = gameState.players[gameState.currentPlayerIndex];
+  elements.currentPlayerLabel.textContent = cur ? cur.name : '—';
+  elements.bagCount.textContent = (gameState.bag || []).length.toString();
 }
 
 function renderHistory() {
   elements.historyList.innerHTML = '';
   const fragment = document.createDocumentFragment();
-  state.history.slice(0, 14).forEach(entry => {
+  (gameState.history || []).slice(0, 14).forEach(entry => {
     const li = document.createElement('li');
     li.textContent = entry.message;
     fragment.appendChild(li);
@@ -416,563 +483,342 @@ function renderHistory() {
 }
 
 function updateTurnInfo() {
-  elements.turnCounter.textContent = state.gameOver ? 'Spielende' : `Zug ${state.turn}`;
-}
-
-function setStatus(message, tone = 'info') {
-  elements.statusMessage.textContent = message;
-  elements.statusMessage.classList.remove('status-info', 'status-success', 'status-error');
-  const toneClass = tone === 'success' ? 'status-success' : tone === 'error' ? 'status-error' : 'status-info';
-  elements.statusMessage.classList.add(toneClass);
+  elements.turnCounter.textContent = gameState.gameOver ? 'Ende' : `Zug ${gameState.turn}`;
 }
 
 function updateControls() {
-  const hasPlayers = state.players.length > 0;
-  const hasPlacements = state.placements.size > 0;
-  elements.submitBtn.disabled = !hasPlacements || state.gameOver;
-  elements.recallBtn.disabled = !hasPlacements || state.gameOver;
-  elements.shuffleBtn.disabled = !hasPlayers || hasPlacements || state.gameOver;
-  elements.exchangeBtn.disabled = !hasPlayers || hasPlacements || state.gameOver || state.bag.length < 7;
-  elements.passBtn.disabled = !hasPlayers || hasPlacements || state.gameOver;
+  const myTurn = localState.isMyTurn;
+  const placed = localState.placements.size > 0;
+  elements.submitBtn.disabled = !myTurn || !placed || gameState.gameOver;
+  elements.recallBtn.disabled = !placed || gameState.gameOver;
+  elements.exchangeBtn.disabled = !myTurn || placed || gameState.gameOver || (gameState.bag || []).length < 7;
+  elements.passBtn.disabled = !myTurn || placed || gameState.gameOver;
 }
 
-function getCurrentPlayer() {
-  return state.players[state.currentPlayerIndex];
+function setStatus(msg, tone = 'info') {
+  elements.statusMessage.textContent = msg;
+  elements.statusMessage.className = 'status-message ' + (tone === 'success' ? 'status-success' : tone === 'error' ? 'status-error' : 'status-info');
 }
 
-function handleRackClick(event) {
-  if (state.gameOver) return;
-  const button = event.target.closest('.tile-btn');
-  if (!button) return;
-  const index = Number(button.dataset.index);
-  state.selectedRackIndex = state.selectedRackIndex === index ? null : index;
+function handleRackClick(e) {
+  if (gameState.gameOver) return;
+  const btn = e.target.closest('.tile-btn');
+  if (!btn) return;
+  const idx = Number(btn.dataset.index);
+  localState.selectedRackIndex = localState.selectedRackIndex === idx ? null : idx;
   renderRack();
-  updateControls();
 }
 
-function handleBoardClick(event) {
-  if (state.gameOver) return;
-  const cellEl = event.target.closest('.board-cell');
+function handleBoardClick(e) {
+  if (gameState.gameOver || !localState.isMyTurn) return;
+  const cellEl = e.target.closest('.board-cell');
   if (!cellEl) return;
   const row = Number(cellEl.dataset.row);
   const col = Number(cellEl.dataset.col);
-  const cell = state.board[row][col];
-  if (cell.letter && !cell.locked) {
-    removeTileFromBoard(cell);
+  
+  const existingLocal = Array.from(localState.placements.values()).find(p => p.row === row && p.col === col);
+  if (existingLocal) {
+    localState.placements.delete(existingLocal.tile.id);
+    renderRack(); renderBoard(); updateControls();
     return;
   }
-  if (state.selectedRackIndex === null) {
-    setStatus('Wähle zuerst einen Stein aus deinem Rack.', 'info');
-    return;
-  }
-  placeSelectedTile(row, col);
-}
-
-function placeSelectedTile(row, col) {
-  const player = getCurrentPlayer();
-  const cell = state.board[row][col];
-  if (!player || cell.letter) {
-    setStatus('Dieses Feld ist bereits belegt.', 'error');
-    return;
-  }
-  const tile = player.rack.splice(state.selectedRackIndex, 1)[0];
+  if (gameState.board[row][col].locked) return;
+  if (localState.selectedRackIndex === null) { setStatus('Stein wählen.', 'info'); return; }
+  
+  const player = getCurrentPlayerObj();
+  const placedIds = new Set(localState.placements.keys());
+  const visibleRack = player.rack.filter(t => !placedIds.has(t.id));
+  const tile = visibleRack[localState.selectedRackIndex];
+  
   if (!tile) return;
-  cell.letter = tile.isBlank ? (tile.assignedLetter || '?') : tile.letter;
-  cell.value = tile.value;
-  cell.tileId = tile.id;
-  cell.isBlank = tile.isBlank;
-  cell.locked = false;
-  state.placements.set(tile.id, { row, col, tile });
-  state.selectedRackIndex = null;
-  renderRack();
-  renderBoard();
-  updateControls();
-  if (tile.isBlank && !tile.assignedLetter) {
-    openBlankModal(tile, row, col);
+  if (Array.from(localState.placements.values()).some(p => p.row === row && p.col === col)) {
+    setStatus('Feld belegt.', 'error'); return;
   }
-}
-
-function removeTileFromBoard(cell) {
-  const placement = state.placements.get(cell.tileId);
-  if (!placement) return;
-  const player = getCurrentPlayer();
-  if (!player) return;
-  if (placement.tile.isBlank) {
-    placement.tile.assignedLetter = null;
-  }
-  player.rack.push(placement.tile);
-  state.placements.delete(cell.tileId);
-  cell.letter = '';
-  cell.value = 0;
-  cell.tileId = null;
-  cell.isBlank = false;
-  renderRack();
-  renderBoard();
-  updateControls();
+  
+  localState.placements.set(tile.id, { row, col, tile });
+  localState.selectedRackIndex = null;
+  if (tile.isBlank && !tile.assignedLetter) openBlankModal(tile, row, col);
+  else { renderRack(); renderBoard(); updateControls(); }
 }
 
 function openBlankModal(tile, row, col) {
-  state.pendingBlank = { tile, row, col };
-  elements.blankModal.classList.remove('hidden');
+  localState.pendingBlank = { tileId: tile.id, row, col };
   elements.blankModal.classList.add('show');
 }
-
 function closeBlankModal() {
   elements.blankModal.classList.remove('show');
-  state.pendingBlank = null;
-  setTimeout(() => elements.blankModal.classList.add('hidden'), 180);
+  localState.pendingBlank = null;
 }
-
-function buildBlankChoices() {
-  elements.blankChoices.innerHTML = '';
-  BLANK_CHOICES.forEach(letter => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = letter;
-    button.addEventListener('click', () => applyBlankLetter(letter));
-    elements.blankChoices.appendChild(button);
-  });
+function applyBlankLetter(l) {
+  if (!localState.pendingBlank) return;
+  const { tileId } = localState.pendingBlank;
+  const p = localState.placements.get(tileId);
+  if (p) p.tile.assignedLetter = l;
+  closeBlankModal(); renderBoard(); renderRack();
 }
-
-function applyBlankLetter(letter) {
-  if (!state.pendingBlank) return;
-  const { tile, row, col } = state.pendingBlank;
-  tile.assignedLetter = letter;
-  const cell = state.board[row][col];
-  cell.letter = letter;
-  closeBlankModal();
-  renderBoard();
-}
-
 function handleRecall() {
-  if (!state.placements.size) return;
-  const player = getCurrentPlayer();
-  state.placements.forEach(({ row, col, tile }) => {
-    const cell = state.board[row][col];
-    cell.letter = '';
-    cell.value = 0;
-    cell.tileId = null;
-    cell.isBlank = false;
-    if (tile.isBlank) tile.assignedLetter = null;
-    player.rack.push(tile);
-  });
-  state.placements.clear();
-  renderRack();
-  renderBoard();
-  updateControls();
+  localState.placements.clear();
+  localState.selectedRackIndex = null;
+  renderRack(); renderBoard(); updateControls();
 }
-
 function handleShuffleRack() {
-  if (state.placements.size) {
-    setStatus('Bringe zuerst alle gelegten Steine zurück.', 'error');
-    return;
+  const p = getCurrentPlayerObj();
+  if (p && p.rack) {
+    shuffle(p.rack);
+    const idx = gameState.players.findIndex(pl => pl.id === p.id);
+    gameRef.child(`players/${idx}/rack`).set(p.rack);
   }
-  const player = getCurrentPlayer();
-  shuffle(player.rack);
-  renderRack();
 }
-
-function handleSubmitMove() {
-  const validation = validateMove();
-  if (!validation.valid) {
-    setStatus(validation.message, 'error');
-    return;
-  }
-  finalizeMove(validation);
-}
-
-function validateMove() {
-  if (!state.dictionary.size) {
-    return { valid: false, message: 'Wörterbuch lädt noch …' };
-  }
-  if (!state.placements.size) {
-    return { valid: false, message: 'Platziere mindestens einen Stein.' };
-  }
-  const placements = Array.from(state.placements.values()).map(entry => ({
-    row: entry.row,
-    col: entry.col,
-    tile: entry.tile
-  }));
-  const rows = placements.map(p => p.row);
-  const cols = placements.map(p => p.col);
-  const sameRow = rows.every(row => row === rows[0]);
-  const sameCol = cols.every(col => col === cols[0]);
-  if (!sameRow && !sameCol) {
-    return { valid: false, message: 'Alle Steine müssen in einer Reihe oder Spalte liegen.' };
-  }
-  const orientation = sameRow ? 'row' : 'col';
-  const boardHasTiles = state.board.some(row => row.some(cell => cell.locked));
-  const { contiguous, touchesConnection } = ensureContiguity(placements, orientation, boardHasTiles);
-  if (!contiguous) {
-    return { valid: false, message: 'Die Steine müssen lückenlos verbunden sein.' };
-  }
-  if (!boardHasTiles) {
-    if (!placements.some(p => p.row === 7 && p.col === 7)) {
-      return { valid: false, message: 'Der erste Zug muss das Mittelfeld nutzen.' };
-    }
-  } else if (!touchesConnection) {
-    return { valid: false, message: 'Der Zug muss an bestehende Wörter anschließen.' };
-  }
-  if (placements.some(p => p.tile.isBlank && !p.tile.assignedLetter)) {
-    return { valid: false, message: 'Weise allen Blanko-Steinen einen Buchstaben zu.' };
-  }
-
-  const mainWord = collectWord(placements[0].row, placements[0].col, orientation);
-  if (!mainWord || !mainWord.word) {
-    return { valid: false, message: 'Das gelegte Wort konnte nicht erkannt werden.' };
-  }
-  if (!state.dictionary.has(mainWord.word)) {
-    return { valid: false, message: `"${mainWord.word}" ist nicht im Wörterbuch.` };
-  }
-
-  const crossWords = [];
-  placements.forEach(placement => {
-    const perpendicular = collectWord(placement.row, placement.col, orientation === 'row' ? 'col' : 'row');
-    if (perpendicular && perpendicular.letters.length > 1) {
-      if (!state.dictionary.has(perpendicular.word)) {
-        crossWords.push({ ...perpendicular, invalid: true });
-      } else {
-        crossWords.push(perpendicular);
-      }
-    }
-  });
-  const invalidCross = crossWords.find(word => word.invalid);
-  if (invalidCross) {
-    return { valid: false, message: `"${invalidCross.word}" ist nicht erlaubt.` };
-  }
-
-  const mainScore = calculateWordScore(mainWord);
-  const crossScores = crossWords.map(word => calculateWordScore(word));
-  let totalScore = mainScore.score + crossScores.reduce((sum, word) => sum + word.score, 0);
-  const usedAllLetters = placements.length === RACK_SIZE;
-  if (usedAllLetters && getCurrentPlayer().rack.length === 0) {
-    totalScore += BINGO_BONUS;
-  }
-  return {
-    valid: true,
-    score: totalScore,
-    words: [mainScore, ...crossScores],
-    placements,
-    usedAllLetters
-  };
-}
-
-function ensureContiguity(placements, orientation, boardHasTiles) {
-  if (!placements.length) return { contiguous: false, touchesConnection: false };
-  let touchesConnection = false;
-  if (orientation === 'row') {
-    const row = placements[0].row;
-    const cols = placements.map(p => p.col);
-    const min = Math.min(...cols);
-    const max = Math.max(...cols);
-    for (let col = min; col <= max; col += 1) {
-      if (!state.board[row][col].letter) {
-        return { contiguous: false, touchesConnection: false };
-      }
-      if (state.board[row][col].locked) touchesConnection = true;
-    }
-  } else {
-    const col = placements[0].col;
-    const rows = placements.map(p => p.row);
-    const min = Math.min(...rows);
-    const max = Math.max(...rows);
-    for (let row = min; row <= max; row += 1) {
-      if (!state.board[row][col].letter) {
-        return { contiguous: false, touchesConnection: false };
-      }
-      if (state.board[row][col].locked) touchesConnection = true;
-    }
-  }
-  if (!touchesConnection && boardHasTiles) {
-    touchesConnection = placements.some(p => hasLockedNeighbor(p.row, p.col));
-  }
-  return { contiguous: true, touchesConnection: boardHasTiles ? touchesConnection : true };
-}
-
-function hasLockedNeighbor(row, col) {
-  const neighbors = [
-    [row - 1, col],
-    [row + 1, col],
-    [row, col - 1],
-    [row, col + 1]
-  ];
-  return neighbors.some(([r, c]) => r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && state.board[r][c].locked);
-}
-
-function collectWord(row, col, orientation) {
-  const delta = orientation === 'row' ? { dr: 0, dc: 1 } : { dr: 1, dc: 0 };
-  let startRow = row;
-  let startCol = col;
-  while (isLetterCell(startRow - delta.dr, startCol - delta.dc)) {
-    startRow -= delta.dr;
-    startCol -= delta.dc;
-  }
-  const letters = [];
-  const positions = [];
-  let currentRow = startRow;
-  let currentCol = startCol;
-  while (isLetterCell(currentRow, currentCol)) {
-    letters.push(state.board[currentRow][currentCol].letter);
-    positions.push({ row: currentRow, col: currentCol });
-    currentRow += delta.dr;
-    currentCol += delta.dc;
-  }
-  return {
-    word: normalizeWord(letters.join('')),
-    letters,
-    positions
-  };
-}
-
-function isLetterCell(row, col) {
-  if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
-  return Boolean(state.board[row][col].letter);
-}
-
-function calculateWordScore(wordInfo) {
-  let wordMultiplier = 1;
-  let total = 0;
-  wordInfo.positions.forEach(({ row, col }) => {
-    const cell = state.board[row][col];
-    const base = cell.value;
-    if (cell.locked) {
-      total += base;
-    } else {
-      total += base * cell.multiplier.letter;
-      wordMultiplier *= cell.multiplier.word;
-    }
-  });
-  return { word: wordInfo.word, score: total * wordMultiplier };
-}
-
-function finalizeMove(validation) {
-  const player = getCurrentPlayer();
-  validation.placements.forEach(({ row, col }) => {
-    state.board[row][col].locked = true;
-  });
-  const rackEmptyBeforeDraw = player.rack.length === 0;
-  const wordSummary = validation.words.map(word => `${word.word} (+${word.score})`).join(', ');
-  recordHistory({ message: `${player.name} legt ${wordSummary} · ${validation.score} Punkte` });
-  player.score += validation.score;
-  state.placements.clear();
-  drawTiles(player);
-  state.passes = 0;
-  renderEverything(`${player.name} erhält ${validation.score} Punkte.`);
-  if (validation.usedAllLetters) {
-    setStatus(`${player.name} erzielt einen Scrabble! +${BINGO_BONUS} Punkte`, 'success');
-  }
-  const finisherIndex = rackEmptyBeforeDraw && state.bag.length === 0 ? state.currentPlayerIndex : null;
-  if (finisherIndex !== null) {
-    finalizeGame('out-of-tiles', finisherIndex);
-    return;
-  }
-  advancePlayer();
-  checkGameOver();
-}
-
-function advancePlayer() {
-  state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-  state.turn += 1;
-  state.selectedRackIndex = null;
-  renderPlayers();
-  renderRack();
-  updateControls();
-}
-
 function handlePass() {
-  if (state.placements.size) {
-    setStatus('Entferne zuerst alle gelegten Steine, bevor du passt.', 'error');
-    return;
-  }
-  const player = getCurrentPlayer();
-  state.passes += 1;
-  recordHistory({ message: `${player.name} passt.` });
-  setStatus(`${player.name} setzt eine Runde aus.`, 'info');
-  advancePlayer();
-  checkGameOver();
+  if (!localState.isMyTurn) return;
+  const updates = {};
+  updates['passes'] = (gameState.passes || 0) + 1;
+  updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+  updates['turn'] = gameState.turn + 1;
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `${getCurrentPlayerObj().name} passt.` });
+  updates['history'] = hist;
+  gameRef.update(updates);
+  if (updates.passes >= gameState.players.length * 2) finishGameRemote('passes');
 }
 
+// --- EXCHANGE ---
 function openExchangeModal() {
-  if (state.gameOver) return;
-  if (state.placements.size) {
-    setStatus('Ziehe zunächst deine gelegten Steine zurück.', 'error');
-    return;
-  }
-  if (state.bag.length < 7) {
-    setStatus('Ein Tausch ist nur möglich, wenn mindestens 7 Steine im Beutel sind.', 'error');
-    return;
-  }
-  state.exchangeSelection.clear();
+  if (!localState.isMyTurn) return;
+  localState.exchangeSelection.clear();
   buildExchangeChoices();
-  elements.exchangeModal.classList.remove('hidden');
   elements.exchangeModal.classList.add('show');
-  updateExchangeControls();
 }
 
 function buildExchangeChoices() {
-  const player = getCurrentPlayer();
+  const player = getCurrentPlayerObj();
   elements.exchangeChoices.innerHTML = '';
   player.rack.forEach(tile => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'tile-btn selectable';
-    if (tile.isBlank) button.classList.add('blank');
-    button.dataset.tileId = tile.id;
-    button.innerHTML = `${tile.assignedLetter || tile.letter}<span>${tile.value}</span>`;
-    button.addEventListener('click', () => toggleExchangeSelection(tile.id, button));
-    elements.exchangeChoices.appendChild(button);
+    const btn = document.createElement('button');
+    btn.className = 'tile-btn selectable';
+    if (tile.isBlank) btn.classList.add('blank');
+    btn.innerHTML = `${tile.assignedLetter || tile.letter}<span>${tile.value}</span>`;
+    btn.onclick = () => {
+      if (localState.exchangeSelection.has(tile.id)) {
+        localState.exchangeSelection.delete(tile.id);
+        btn.classList.remove('selected');
+      } else {
+        localState.exchangeSelection.add(tile.id);
+        btn.classList.add('selected');
+      }
+      elements.confirmExchangeBtn.disabled = localState.exchangeSelection.size === 0;
+    };
+    elements.exchangeChoices.appendChild(btn);
   });
 }
 
-function toggleExchangeSelection(tileId, button) {
-  if (state.exchangeSelection.has(tileId)) {
-    state.exchangeSelection.delete(tileId);
-    button.classList.remove('selected');
-  } else {
-    state.exchangeSelection.add(tileId);
-    button.classList.add('selected');
+function handleConfirmExchange() {
+  const player = getCurrentPlayerObj();
+  const playerIndex = gameState.players.findIndex(p => p.id === player.id);
+  const selectedIds = localState.exchangeSelection;
+  
+  const tilesToTrade = player.rack.filter(t => selectedIds.has(t.id));
+  const keepTiles = player.rack.filter(t => !selectedIds.has(t.id));
+  
+  const bag = [...(gameState.bag || []), ...tilesToTrade];
+  shuffle(bag);
+  
+  while (keepTiles.length < RACK_SIZE && bag.length > 0) {
+    const idx = Math.floor(Math.random() * bag.length);
+    keepTiles.push(bag.splice(idx, 1)[0]);
   }
-  updateExchangeControls();
-}
-
-function updateExchangeControls() {
-  elements.confirmExchangeBtn.disabled = state.exchangeSelection.size === 0;
+  
+  const updates = {};
+  updates[`players/${playerIndex}/rack`] = keepTiles;
+  updates['bag'] = bag;
+  updates['passes'] = 0;
+  updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+  updates['turn'] = gameState.turn + 1;
+  
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `${player.name} tauscht ${selectedIds.size} Steine.` });
+  updates['history'] = hist;
+  
+  gameRef.update(updates).then(() => {
+    closeExchangeModal();
+  });
 }
 
 function closeExchangeModal() {
   elements.exchangeModal.classList.remove('show');
-  state.exchangeSelection.clear();
-  setTimeout(() => elements.exchangeModal.classList.add('hidden'), 180);
+  localState.exchangeSelection.clear();
 }
 
-function handleConfirmExchange() {
-  if (!state.exchangeSelection.size) return;
-  const player = getCurrentPlayer();
-  const selectedIds = new Set(state.exchangeSelection);
-  const returning = [];
-  player.rack = player.rack.filter(tile => {
-    if (selectedIds.has(tile.id)) {
-      if (tile.isBlank) tile.assignedLetter = null;
-      returning.push(tile);
-      return false;
+function handleSubmitMove() {
+  const val = validateMove();
+  if (!val.valid) { setStatus(val.message, 'error'); return; }
+  
+  const player = getCurrentPlayerObj();
+  const pIdx = gameState.players.findIndex(p => p.id === player.id);
+  const updates = {};
+  
+  val.placements.forEach(p => {
+    updates[`board/${p.row}/${p.col}/letter`] = p.tile.isBlank ? (p.tile.assignedLetter || '?') : p.tile.letter;
+    updates[`board/${p.row}/${p.col}/value`] = p.tile.value;
+    updates[`board/${p.row}/${p.col}/locked`] = true;
+    updates[`board/${p.row}/${p.col}/tileId`] = p.tile.id;
+  });
+  
+  const usedIds = new Set(val.placements.map(p => p.tile.id));
+  const newRack = player.rack.filter(t => !usedIds.has(t.id));
+  const bag = [...(gameState.bag || [])];
+  while (newRack.length < RACK_SIZE && bag.length > 0) {
+    const idx = Math.floor(Math.random() * bag.length);
+    newRack.push(bag.splice(idx, 1)[0]);
+  }
+  
+  updates[`players/${pIdx}/rack`] = newRack;
+  updates[`players/${pIdx}/score`] = player.score + val.score;
+  updates['bag'] = bag;
+  
+  const words = val.words.map(w => `${w.word} (+${w.score})`).join(', ');
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `${player.name} legt ${words} · ${val.score} Punkte` });
+  updates['history'] = hist;
+  updates['passes'] = 0;
+  updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+  updates['turn'] = gameState.turn + 1;
+  
+  gameRef.update(updates).then(() => {
+    localState.placements.clear();
+    if (newRack.length === 0 && bag.length === 0) finishGameRemote('out', pIdx);
+  });
+}
+
+function validateMove() {
+  if (!localState.dictionary.size) return { valid: false, message: 'Wörterbuch lädt...' };
+  const placements = Array.from(localState.placements.values());
+  const tempBoard = gameState.board.map(r => r.map(c => ({...c})))
+  placements.forEach(p => {
+    tempBoard[p.row][p.col].letter = p.tile.isBlank ? (p.tile.assignedLetter || '?') : p.tile.letter;
+    tempBoard[p.row][p.col].value = p.tile.value;
+  });
+  
+  const rows = placements.map(p => p.row);
+  const cols = placements.map(p => p.col);
+  const sameRow = rows.every(r => r === rows[0]);
+  const sameCol = cols.every(c => c === cols[0]);
+  if (!sameRow && !sameCol) return { valid: false, message: 'Nicht in einer Linie.' };
+  
+  const orient = sameRow ? 'row' : 'col';
+  const boardHasTiles = gameState.board.some(r => r.some(c => c.locked));
+  
+  const { contiguous, touchesConnection } = checkContiguity(tempBoard, placements, orient, boardHasTiles);
+  if (!contiguous) return { valid: false, message: 'Lücken im Wort.' };
+  if (!boardHasTiles && !placements.some(p => p.row === 7 && p.col === 7)) return { valid: false, message: 'Mitte muss belegt werden.' };
+  if (boardHasTiles && !touchesConnection) return { valid: false, message: 'Muss anschließen.' };
+  
+  const mainWord = collectWord(tempBoard, placements[0].row, placements[0].col, orient);
+  if (!localState.dictionary.has(mainWord.word)) return { valid: false, message: `"${mainWord.word}" unbekannt.` };
+  
+  const crossWords = [];
+  for (const p of placements) {
+    const perp = orient === 'row' ? 'col' : 'row';
+    const w = collectWord(tempBoard, p.row, p.col, perp);
+    if (w.letters.length > 1) {
+      if (!localState.dictionary.has(w.word)) return { valid: false, message: `"${w.word}" unbekannt.` };
+      crossWords.push(w);
     }
-    return true;
-  });
-  returning.forEach(tile => state.bag.push(tile));
-  shuffle(state.bag);
-  drawTiles(player);
-  recordHistory({ message: `${player.name} tauscht ${selectedIds.size} Stein(e).` });
-  setStatus(`${player.name} hat Steine getauscht.`, 'info');
-  state.passes = 0;
-  closeExchangeModal();
-  renderRack();
-  renderPlayers();
-  advancePlayer();
-  checkGameOver();
-}
-
-function recordHistory(entry) {
-  state.history.unshift(entry);
-  renderHistory();
-}
-
-function checkGameOver() {
-  if (state.gameOver) return;
-  const emptyPlayerIndex = state.players.findIndex(player => player.rack.length === 0);
-  if (emptyPlayerIndex !== -1 && state.bag.length === 0) {
-    finalizeGame('out-of-tiles', emptyPlayerIndex);
-    return;
   }
-  if (state.passes >= state.players.length * 2) {
-    finalizeGame('passes');
-  }
+  
+  const mainScore = calculateScore(tempBoard, mainWord, placements);
+  const crossScores = crossWords.map(w => calculateScore(tempBoard, w, placements));
+  let total = mainScore.score + crossScores.reduce((s, w) => s + w.score, 0);
+  if (placements.length === 7) total += BINGO_BONUS;
+  
+  return { valid: true, score: total, words: [mainScore, ...crossScores], placements };
 }
 
-function finalizeGame(reason, finisherIndex = null) {
-  state.gameOver = true;
-  let totalLeftovers = 0;
-  state.players.forEach(player => {
-    const leftover = player.rack.reduce((sum, tile) => sum + tile.value, 0);
-    player.score -= leftover;
-    totalLeftovers += leftover;
-  });
-  if (finisherIndex !== null) {
-    state.players[finisherIndex].score += totalLeftovers;
-  }
-  renderPlayers();
-  const ranking = [...state.players].sort((a, b) => b.score - a.score);
-  const winner = ranking[0];
-  const reasonText = reason === 'passes'
-    ? 'Alle Spieler haben mehrfach ausgesetzt.'
-    : 'Es sind keine Steine mehr vorhanden.';
-  const summary = `Spielende: ${reasonText} Sieger: ${winner ? `${winner.name} (${winner.score} Punkte)` : '—'}`;
-  setStatus(summary, 'success');
-  recordHistory({ message: summary });
-  updateControls();
-}
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function normalizeWord(word = '') {
-  return word
-    .trim()
-    .toUpperCase()
-    .replace(/\u1E9E/g, 'SS')
-    .replace(/\u00DF/g, 'SS');
-}
-
-
-async function loadRemoteDictionary() {
-  const dictionary = new Set();
-  FALLBACK_WORDS.forEach(word => {
-    const normalized = normalizeWord(word);
-    if (normalized) {
-      dictionary.add(normalized);
+function checkContiguity(board, placements, orient, boardHasTiles) {
+  let touches = false;
+  if (orient === 'row') {
+    const row = placements[0].row;
+    const cols = placements.map(p => p.col);
+    const min = Math.min(...cols), max = Math.max(...cols);
+    for (let c = min; c <= max; c++) {
+      if (!board[row][c].letter) return { contiguous: false };
+      if (gameState.board[row][c].locked) touches = true;
     }
+  } else {
+    const col = placements[0].col;
+    const rows = placements.map(p => p.row);
+    const min = Math.min(...rows), max = Math.max(...rows);
+    for (let r = min; r <= max; r++) {
+      if (!board[r][col].letter) return { contiguous: false };
+      if (gameState.board[r][col].locked) touches = true;
+    }
+  }
+  if (!touches && boardHasTiles) {
+    touches = placements.some(p => {
+       const n = [[p.row-1, p.col], [p.row+1, p.col], [p.row, p.col-1], [p.row, p.col+1]];
+       return n.some(([r,c]) => r>=0 && r<15 && c>=0 && c<15 && gameState.board[r][c].locked);
+    });
+  }
+  return { contiguous: true, touchesConnection: boardHasTiles ? touches : true };
+}
+
+function collectWord(board, row, col, orient) {
+  const dr = orient === 'row' ? 0 : 1;
+  const dc = orient === 'row' ? 1 : 0;
+  let r = row, c = col;
+  while (r-dr >= 0 && c-dc >= 0 && board[r-dr][c-dc].letter) { r -= dr; c -= dc; }
+  const letters = [], positions = [];
+  while (r < 15 && c < 15 && board[r][c].letter) {
+    letters.push(board[r][c].letter);
+    positions.push({ row: r, col: c });
+    r += dr; c += dc;
+  }
+  return { word: letters.join(''), letters, positions };
+}
+
+function calculateScore(board, wordInfo, placements) {
+  let wordMult = 1, score = 0;
+  const placementSet = new Set(placements.map(p => `${p.row},${p.col}`));
+  wordInfo.positions.forEach(({ row, col }) => {
+    const cell = board[row][col];
+    const isNew = placementSet.has(`${row},${col}`);
+    const m = MULTIPLIER_MATRIX[row][col];
+    let val = cell.value;
+    if (isNew) { val *= m.letter; wordMult *= m.word; }
+    score += val;
   });
-  let source = 'fallback';
+  return { word: wordInfo.word, score: score * wordMult };
+}
+
+function finishGameRemote(reason, pIdx) {
+  const players = [...gameState.players];
+  let deduction = 0;
+  players.forEach(p => { const s = p.rack.reduce((a,b)=>a+b.value,0); p.score -= s; deduction += s; });
+  if (pIdx !== undefined) players[pIdx].score += deduction;
+  players.sort((a,b) => b.score - a.score);
+  const w = players[0];
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `Spielende! Sieger: ${w.name}` });
+  gameRef.update({ gameOver: true, players, winner: w, history: hist });
+}
+
+async function initDictionary() {
+  if (window.GERMAN_DICTIONARY && Array.isArray(window.GERMAN_DICTIONARY)) {
+     window.GERMAN_DICTIONARY.forEach(w => localState.dictionary.add(normalizeWord(w)));
+  }
+  FALLBACK_WORDS.forEach(w => localState.dictionary.add(normalizeWord(w)));
   for (const url of REMOTE_DICTIONARY_SOURCES) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      const textContent = await response.text();
-      textContent.split(/\r?\n/).forEach(line => {
-        const normalized = normalizeWord(line);
-        if (normalized) {
-          dictionary.add(normalized);
-        }
-      });
-      source = 'remote';
-      break;
-    } catch (error) {
-      // ignore network errors and continue with fallback
-    }
+      const res = await fetch(url);
+      if (res.ok) {
+        const txt = await res.text();
+        txt.split(/\r?\n/).forEach(l => localState.dictionary.add(normalizeWord(l)));
+        elements.dictionaryChip.textContent = `Wörterbuch: ${localState.dictionary.size}`;
+        break;
+      }
+    } catch (e) {}
   }
-  return { set: dictionary, source };
+  elements.dictionaryChip.textContent = `Wörterbuch: ${localState.dictionary.size}`;
 }
-
-
-function addPlayerInput(defaultValue = '') {
-  const currentInputs = elements.playerInputList.querySelectorAll('input');
-  if (currentInputs.length >= 4) {
-    setStatus('Es können maximal vier Spieler teilnehmen.', 'error');
-    return;
-  }
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = `Spieler ${currentInputs.length + 1}`;
-  input.value = defaultValue;
-  elements.playerInputList.appendChild(input);
-}
-
-function setupPlayerForm() {
-  elements.playerInputList.innerHTML = '';
-  addPlayerInput('');
-  addPlayerInput('');
-}
-
+function normalizeWord(w) { return w.trim().toUpperCase(); }
+function shuffle(a) { for (let i = a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }

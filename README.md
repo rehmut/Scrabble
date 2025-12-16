@@ -1,45 +1,40 @@
-# Deutsche Scrabble Web-App
+# Online Scrabble Clone
 
-Ein leichtgewichtiger Scrabble-Client mit deutschem Regelwerk, Wortprüfung und lokalem Mehrspielermodus. Die Anwendung benötigt kein Build-Tooling und läuft direkt im Browser.
+A multiplayer Scrabble-like game built with Vanilla JS and Firebase. Playable on desktop and mobile.
 
 ## Features
-- 15×15-Brett mit offiziellen Bonusfeldern (DW/DL/TW/TL) und hervorgehobenen Neuzügen
-- Vollständiger Steinsack nach deutschem Scrabble-Set (inkl. Ä/Ö/Ü und Blanko)
-- Hot-Seat-Mehrspieler für 2–4 Personen mit Punktestand, Verlauf und Beutelanzeige
-- Wortprüfung gegen ein eingebettetes Fallback-Wörterbuch plus optionale Ladeversuche großer Online-Listen
-- Aktionen pro Zug: legen, Rückruf, mischen, austauschen (inkl. Auswahl-Dialog), passen
-- Automatische Wertung inkl. Kreuzwörtern, Bingo-Bonus und Endabrechnung (Steine leer oder zu viele Pässe)
-- Moderne UI mit Status-Badges, Verlaufslog und responsive Layouts
+- **Online Multiplayer:** Play with friends across different devices.
+- **Real-time Sync:** Moves update instantly for all players.
+- **German Dictionary:** Integrated German dictionary support.
+- **Responsive Design:** Works on desktop and mobile.
 
-## Schnellstart
-1. Öffne `index.html` in einem aktuellen Browser (Chrome, Edge, Firefox, Safari). Ein lokaler Webserver ist nicht nötig.
-2. Trage im Overlay 2–4 Spielernamen ein und starte das Spiel.
-3. Wähle Steine aus der Auslage, platziere sie per Klick auf das Brett und bestätige den Zug.
-4. Nutze die Buttons unter dem Rack zum Zurückholen, Mischen, Tauschen oder Passen.
+## Setup & Deployment
 
-> **Hinweis:** Die App bringt eine eingebaute Fallback-Wortliste mit. Wenn eine Internetverbindung besteht, lädt sie zusätzlich große Wortlisten von GitHub. Damit funktioniert der Start auch bei `file://`-Aufruf ohne lokalen Webserver.
+### 1. Firebase Setup
+To enable multiplayer, you need a free Firebase project:
+1. Go to [Firebase Console](https://console.firebase.google.com/).
+2. Create a new project.
+3. Enable **Realtime Database** (start in **Test Mode** for simplicity).
+4. Go to Project Settings -> General -> Your apps -> Add app -> Web.
+5. Copy the `firebaseConfig` object.
 
-## Projektstruktur
-```
-Scrabble/
-├── index.html               # App-Shell und Overlays
-├── styles.css               # Layout & Styling
-├── scripts/
-│   └── app.js               # Spiellogik, UI-Events und Wörterbuch-Handling
-├── data/
-│   └── german_fallback_words.json  # Pflege-Datei für den eingebetteten Wortschatz
-└── README.md
-```
+### 2. Configuration
+1. Open `scripts/app.js`.
+2. Replace the `firebaseConfig` placeholder at the top of the file with your copied configuration.
 
-## Wörterbuch & Erweiterung
-- Remote-Quellen: `hermitdave/FrequencyWords` (de_50k) und `enz/german-wordlist`. Bei Erfolg werden beide Sets kombiniert.
-- Offline/Fallback: ca. 300 häufige deutsche Wörter – direkt in `app.js` eingebettet, die JSON-Datei dient nur als editierbare Quelle.
-- Eigene Listen lassen sich ergänzen, indem du weitere `fetch`-Aufrufe in `scripts/app.js` hinzufügst oder die bestehende Wortliste erweiterst.
+### 3. Deploy to Vercel
+1. Push this code to a GitHub/GitLab repository.
+2. Import the project into Vercel.
+3. Deploy! (No build command needed, it's a static site).
 
-## Weiterentwicklung
-- Backend/WebSocket für echtes Online-Multiplayer (Matchmaking, Chat, Replays)
-- Persistenz (z. B. LocalStorage oder Datenbank) für Spielstände und Statistiken
-- Automatisierte Tests für Wertungslogik und Brettvalidierung
-- Touch-Drag & Drop und zusätzliche Sprachpakete
+## How to Play
+1. Open the deployed URL.
+2. Enter your **Name** and a **Game ID** (e.g., "ROOM1").
+3. Share the **Game ID** with your friends.
+4. Once everyone has joined, the first player starts.
 
-Viel Spaß beim Legen!
+## Local Development
+Simply open `index.html` in a web browser (or use a local server like `live-server` or `python -m http.server`).
+
+## License
+MIT

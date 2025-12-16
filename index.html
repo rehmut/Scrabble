@@ -65,47 +65,73 @@
     </main>
   </div>
 
-  <div id="startOverlay" class="overlay is-visible">
+  <div id="lobbyOverlay" class="overlay is-visible">
     <div class="overlay-card">
-      <h2>Neues Spiel starten</h2>
-      <p>Trage 2–4 Spielernamen ein. Die Regeln orientieren sich am offiziellen deutschen Scrabble.</p>
+      <h2>Scrabble Online</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+        Gib deinen Namen ein und starte oder trete einem Spiel bei.
+      </p>
+      <div class="player-inputs">
+        <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
+        <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button id="joinGameBtn" class="primary" style="width: 100%;">Spiel beitreten / starten</button>
+      </div>
+      <p id="lobbyStatus" style="margin-top: 10px; font-size: 0.8rem; color: var(--danger); min-height: 1.2em;"></p>
+    </div>
+  </div>
+
+  <div id="startOverlay" class="overlay hidden">
+    <!-- Existing start overlay content will be hidden/unused in multiplayer mode initially -->
+    <div class="overlay-card">
+      <h2>Neues Spiel</h2>
+      <p class="dictionary-hint">Wörterbuch wird geladen …</p>
       <form id="playerForm">
-        <div class="player-inputs" id="playerInputList"></div>
+        <div class="player-inputs" id="playerInputList">
+          <input type="text" placeholder="Spieler 1" value="Spieler 1" />
+          <input type="text" placeholder="Spieler 2" value="Spieler 2" />
+        </div>
+        <button type="button" id="addPlayerField" class="icon-btn" style="margin-bottom: 20px; width: 100%; border-radius: 10px; font-size: 1rem;">+ Weiteren Spieler hinzufügen</button>
         <div class="form-actions">
-          <button type="button" id="addPlayerField">+ Spieler hinzufügen</button>
-          <button type="submit" class="primary">Spiel starten</button>
+          <button type="submit" class="primary" style="flex: 1;">Spiel starten</button>
         </div>
       </form>
-      <p class="dictionary-hint">Das Wörterbuch wird automatisch geladen. Offline steht eine kompakte Liste als Fallback bereit.</p>
     </div>
   </div>
 
-  <div id="blankModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div id="blankModal" class="modal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Blanko-Plättchen</h3>
+        <h3>Blanko-Stein</h3>
         <button class="icon-btn" data-close-blank>&times;</button>
       </div>
-      <p>Wähle den gewünschten Buchstaben für dein leeres Plättchen.</p>
-      <div id="blankChoices" class="blank-grid"></div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Wähle einen Buchstaben für den Blanko-Stein:</p>
+      <div class="blank-grid" id="blankChoices"></div>
     </div>
   </div>
 
-  <div id="exchangeModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div id="exchangeModal" class="modal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Steine austauschen</h3>
+        <h3>Steine tauschen</h3>
         <button class="icon-btn" data-close-exchange>&times;</button>
       </div>
-      <p>Markiere die Steine, die du gegen neue eintauschen möchtest (Beutel &ge; 7).</p>
-      <div id="exchangeChoices" class="rack-tiles rack-tiles--compact"></div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Wähle die Steine, die du tauschen möchtest:</p>
+      <div class="rack-wrapper rack-tiles--compact" style="margin: 16px 0; background: rgba(0,0,0,0.2);">
+        <div id="exchangeChoices" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+      </div>
       <div class="form-actions">
-        <button id="confirmExchangeBtn" class="primary" disabled>Tausch bestätigen</button>
-        <button id="cancelExchangeBtn" type="button">Abbrechen</button>
+        <button id="cancelExchangeBtn">Abbrechen</button>
+        <button id="confirmExchangeBtn" class="primary" disabled>Tauschen</button>
       </div>
     </div>
   </div>
 
+  <!-- Firebase SDKs (Compat versions for easier local usage without modules) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  
   <script src="scripts/dictionary.js"></script>
   <script src="scripts/app.js"></script>
 </body>

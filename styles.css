@@ -518,33 +518,28 @@ button:not(:disabled):hover {
   .app-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr; /* Panel top, content rest */
-    height: 100vh; /* Force full height constraint */
+    height: 100vh; 
     height: 100dvh;
     overflow: hidden;
   }
 
   .panel {
     border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 8px 12px;
+    border-bottom: 1px solid #222;
+    padding: 4px;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     overflow-x: auto;
-    gap: 12px;
-    min-height: 50px;
-    flex-shrink: 0;
-  }
-  
-  .panel-header {
-    min-width: auto;
-    flex-direction: row;
     gap: 8px;
-    align-items: center;
+    min-height: 40px;
+    background: #000;
+    z-index: 10;
   }
   
-  .panel-header h2 {
-    font-size: 1rem;
-    margin: 0;
+  /* Hide everything in panel except players */
+  .panel-header, .label, .dictionary-chip, .bag-info, .history {
+    display: none !important;
   }
   
   .player-list {
@@ -553,109 +548,121 @@ button:not(:disabled):hover {
     overflow-x: auto;
     margin: 0;
     gap: 8px;
+    padding: 0;
   }
   
   .player-list li {
-    padding: 6px 10px;
-    font-size: 0.85rem;
-  }
-  
-  .history, .bag-info, .dictionary-chip {
-    display: none; 
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    background: #222;
+    border-radius: 4px;
   }
 
   .main-area {
     flex-direction: column; 
     align-items: center;
-    padding: 4px; 
-    gap: 4px;
+    padding: 0; 
+    gap: 0;
     width: 100%;
     overflow: hidden; 
-    justify-content: space-between; /* Distribute space */
+    justify-content: flex-start;
   }
   
   .board-wrapper {
     width: 100%;
+    height: 100%;
     overflow: hidden;
-    padding: 2px;
+    padding: 0;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1; /* Board takes available space */
-    background: transparent; /* Remove background to save visual noise */
-    box-shadow: none;
+    flex: 1;
+    background: #111; 
+    border-radius: 0;
   }
 
   .rack-wrapper {
-    max-width: 100%;
-    order: 2;
     width: 100%;
-    padding: 8px;
-    flex-shrink: 0; /* Rack stays constant size */
-    background: #111; /* Distinct background for controls */
-    border-radius: 12px 12px 0 0;
+    padding: 4px 8px 8px 8px;
+    flex-shrink: 0;
+    background: #080808;
+    border-top: 1px solid #222;
+    border-radius: 0;
+    z-index: 10;
   }
 }
 
 @media (max-width: 720px) {
-  .board-wrapper {
-    overflow-x: hidden;
-    display: flex;
-    align-items: center; /* Center board vertically */
-  }
-
   .board-grid {
     grid-template-columns: repeat(15, 1fr); 
     gap: 1px;
     width: 100%;
-    max-height: 100%; /* Ensure it doesn't overflow vertically */
-    aspect-ratio: 1/1; /* Ideally square overall, but cells can stretch */
+    /* Ensure aspect ratio fits within the available view area, 
+       but prioritize width filling. 
+       We allow height to shrink. */
+    aspect-ratio: 1/1; 
+    max-height: 100%;
+    max-width: 100vw; /* Hard limit */
   }
 
   .board-cell {
-    aspect-ratio: 1/1; /* Back to quadratic or slightly tall */
-    min-height: 0; /* Allow shrinking */
+    aspect-ratio: 1/1; 
+    min-height: 0; 
     border-radius: 0;
     padding: 0;
     font-size: 0.75rem;
+    background-color: #2a2a2a; /* Fallback */
   }
   
   .board-cell-letter {
-    font-size: 0.9rem; 
+    font-size: 4.5vw; /* Responsive font size relative to viewport width */
+    max-font-size: 1.2rem;
     margin-top: 0;
-    line-height: 1.2;
+    line-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
   
   .board-cell-score {
-    font-size: 0.4rem; 
+    font-size: 2vw; /* Responsive small font */
     right: 1px;
-    top: 0;
+    top: 1px;
   }
 
+  /* Optimize Rack for small screens */
   #rack {
-    margin-top: 0;
-    gap: 6px;
+    margin-top: 4px;
+    gap: 4px;
     justify-content: center;
   }
 
   .tile-btn {
-    min-width: 38px;
-    min-height: 38px; /* Slightly smaller rack tiles */
-    font-size: 1.1rem;
-    padding: 4px;
+    flex: 1; /* Grow to fill space */
+    max-width: 13vw; /* Don't get too huge */
+    height: 12vw;
+    max-height: 50px;
+    min-width: 0; /* Allow shrinking */
+    min-height: 0;
+    font-size: 1.2rem;
+    padding: 0;
+    border-radius: 6px;
   }
   
+  .tile-btn span {
+    display: none; /* Hide points on rack tiles to save space if needed, or make tiny */
+  }
+
   .rack-actions {
-    margin-top: 8px;
-    flex-direction: row; 
-    justify-content: center;
-    gap: 8px;
+    margin-top: 4px;
+    gap: 4px;
   }
   
   .rack-actions button {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    flex: 1; 
+    padding: 8px;
+    font-size: 0.8rem;
   }
 }
 

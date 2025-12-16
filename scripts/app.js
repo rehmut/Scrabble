@@ -237,6 +237,17 @@ function handleJoinGame() {
 }
 
 function joinExistingGame(data, playerName) {
+  // Check for expiration (20 hours)
+  const EXPIRATION_MS = 20 * 60 * 60 * 1000;
+  if (data.lastActive && (Date.now() - data.lastActive > EXPIRATION_MS)) {
+    if (confirm('Dieses Spiel ist seit über 20 Stunden inaktiv. Möchtest du ein neues Spiel unter dieser ID starten?')) {
+      createNewGame(playerName);
+    } else {
+      elements.lobbyStatus.textContent = 'Spiel ist abgelaufen.';
+    }
+    return;
+  }
+
   const players = data.players || [];
   const existingPlayer = players.find(p => p.id === localState.myPlayerId);
 
@@ -251,7 +262,7 @@ function joinExistingGame(data, playerName) {
     drawTilesForPlayer(newPlayer, bag);
     
     players.push(newPlayer);
-    gameRef.update({ players, bag }).then(startGameListener);
+    gameRef.update({ players, bag, lastActive: Date.now() }).then(startGameListener);
   }
 }
 
@@ -270,7 +281,8 @@ function createNewGame(playerName) {
     passes: 0,
     turn: 1,
     nextTileId: idRef.value,
-    gameOver: false
+    gameOver: false,
+    lastActive: Date.now()
   };
 
   gameRef.set(newGameData).then(startGameListener);
@@ -578,6 +590,7 @@ function handlePass() {
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `${getCurrentPlayerObj().name} passt.` });
   updates['history'] = hist;
+  updates['lastActive'] = Date.now();
   gameRef.update(updates);
   if (updates.passes >= gameState.players.length * 2) finishGameRemote('passes');
 }
@@ -638,6 +651,7 @@ function handleConfirmExchange() {
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `${player.name} tauscht ${selectedIds.size} Steine.` });
   updates['history'] = hist;
+  updates['lastActive'] = Date.now();
   
   gameRef.update(updates).then(() => {
     closeExchangeModal();
@@ -683,6 +697,7 @@ function handleSubmitMove() {
   updates['passes'] = 0;
   updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
   updates['turn'] = gameState.turn + 1;
+  updates['lastActive'] = Date.now();
   
   gameRef.update(updates).then(() => {
     localState.placements.clear();

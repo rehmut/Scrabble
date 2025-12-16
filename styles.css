@@ -233,11 +233,16 @@ body {
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--tile-text); /* Ensure letter is black */
+  line-height: 1; /* Fix vertical alignment */
 }
 
 .board-cell-score {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: var(--tile-text); /* Match the letter color (black) */
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-weight: 600;
 }
 
 .board-cell.has-letter {
@@ -542,41 +547,56 @@ button:not(:disabled):hover {
   .main-area {
     flex-direction: column; /* Stack board and rack vertically */
     align-items: center;
-    padding: 16px 8px; /* Less padding on mobile */
+    padding: 16px 4px; /* Minimal padding on mobile */
     gap: 16px;
+    width: 100%;
+    overflow: hidden; /* Prevent main area from scrolling horizontally, only board wrapper should */
   }
   
+  .board-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Allow board to scroll horizontally */
+    padding: 12px;
+    display: flex;
+    justify-content: flex-start; /* Align start so you scroll from left */
+  }
+
   .rack-wrapper {
     max-width: 100%; /* Full width rack on mobile */
     order: 2; /* Ensure rack is below board or above depending on preference. Default is below. */
+    width: 100%;
   }
 }
 
 @media (max-width: 720px) {
   .board-grid {
-    grid-template-columns: repeat(15, minmax(20px, 1fr)); /* Smaller minimum cell size */
-    gap: 2px; /* Tighter gap */
-    width: 100%;
+    /* Keep cells large enough for touch (approx 38px) */
+    grid-template-columns: repeat(15, 38px); 
+    gap: 4px;
+    width: max-content; /* Force grid to take required width */
   }
 
   .board-cell {
-    min-height: 20px; /* Allow cells to be smaller */
+    height: 38px; /* Fixed height matching width */
+    min-height: 38px;
     padding: 2px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
   
   .board-cell-letter {
-    font-size: 0.85rem; /* Smaller letters */
+    font-size: 1.1rem; 
   }
   
   .board-cell-score {
-    font-size: 0.5rem; /* Smaller score */
+    font-size: 0.5rem; 
+    right: 2px;
+    top: 1px;
   }
 
   .tile-btn {
-    min-width: 40px;
-    min-height: 40px;
-    font-size: 1.1rem;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.2rem;
     padding: 6px;
   }
   
@@ -585,31 +605,23 @@ button:not(:disabled):hover {
   }
 
   .rack-actions {
-    flex-direction: row; /* Keep buttons side-by-side if possible */
+    flex-direction: row; 
     justify-content: center;
   }
   
   .rack-actions button {
-    padding: 10px 12px;
-    font-size: 0.85rem;
-    flex: 1; /* Stretch buttons */
+    padding: 12px;
+    font-size: 0.9rem;
+    flex: 1; 
   }
 }
 
 @media (max-width: 480px) {
   .board-wrapper {
-    padding: 8px; /* Minimal padding around board */
+    padding: 8px;
     border-radius: 12px;
   }
-  
-  .board-grid {
-     /* Ensure it fits on very narrow screens */
-     gap: 1px;
-  }
-  
-  .board-cell::before {
-    font-size: 0.45rem; /* Tiny labels */
-  }
+  /* Removed shrinking logic, relying on overflow-x: auto from above */
 }
 
 .hidden {

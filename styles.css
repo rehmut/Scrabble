@@ -517,109 +517,144 @@ button:not(:disabled):hover {
 @media (max-width: 1100px) {
   .app-shell {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr; /* Stack panel on top/bottom */
+    grid-template-rows: auto 1fr; /* Panel top, content rest */
+    height: 100vh; /* Force full height constraint */
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .panel {
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 16px;
-    flex-direction: row; /* Horizontal layout for player list on mobile */
+    padding: 8px 12px;
+    flex-direction: row;
     align-items: center;
-    overflow-x: auto; /* Scroll if many players */
-    gap: 16px;
+    overflow-x: auto;
+    gap: 12px;
+    min-height: 50px;
+    flex-shrink: 0;
   }
   
   .panel-header {
-    min-width: 120px;
+    min-width: auto;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .panel-header h2 {
+    font-size: 1rem;
+    margin: 0;
   }
   
   .player-list {
     flex-direction: row;
     flex: 1;
     overflow-x: auto;
+    margin: 0;
+    gap: 8px;
   }
   
-  .history, .bag-info {
-    display: none; /* Hide history/bag on mobile to save space, maybe add toggle later */
+  .player-list li {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .history, .bag-info, .dictionary-chip {
+    display: none; 
   }
 
   .main-area {
-    flex-direction: column; /* Stack board and rack vertically */
+    flex-direction: column; 
     align-items: center;
-    padding: 16px 4px; /* Minimal padding on mobile */
-    gap: 16px;
+    padding: 4px; 
+    gap: 4px;
     width: 100%;
-    overflow: hidden; /* Prevent main area from scrolling horizontally, only board wrapper should */
+    overflow: hidden; 
+    justify-content: space-between; /* Distribute space */
   }
   
   .board-wrapper {
     width: 100%;
-    overflow-x: auto; /* Allow board to scroll horizontally */
-    padding: 12px;
+    overflow: hidden;
+    padding: 2px;
     display: flex;
-    justify-content: flex-start; /* Align start so you scroll from left */
+    align-items: center;
+    justify-content: center;
+    flex: 1; /* Board takes available space */
+    background: transparent; /* Remove background to save visual noise */
+    box-shadow: none;
   }
 
   .rack-wrapper {
-    max-width: 100%; /* Full width rack on mobile */
-    order: 2; /* Ensure rack is below board or above depending on preference. Default is below. */
+    max-width: 100%;
+    order: 2;
     width: 100%;
+    padding: 8px;
+    flex-shrink: 0; /* Rack stays constant size */
+    background: #111; /* Distinct background for controls */
+    border-radius: 12px 12px 0 0;
   }
 }
 
 @media (max-width: 720px) {
   .board-wrapper {
-    overflow-x: hidden; /* Disable scrolling */
-    padding: 4px; /* Minimal padding */
-    display: block; /* Reset flex display */
+    overflow-x: hidden;
+    display: flex;
+    align-items: center; /* Center board vertically */
   }
 
   .board-grid {
-    /* Fit exactly to width, 15 columns */
     grid-template-columns: repeat(15, 1fr); 
-    gap: 1px; /* Minimal gap */
+    gap: 1px;
     width: 100%;
+    max-height: 100%; /* Ensure it doesn't overflow vertically */
+    aspect-ratio: 1/1; /* Ideally square overall, but cells can stretch */
   }
 
   .board-cell {
-    aspect-ratio: auto; /* Allow non-quadratic shape */
-    min-height: 36px; /* Taller rectangular shape */
-    border-radius: 0; /* Remove curves to maximize space */
-    padding: 1px;
-    font-size: 0.8rem;
+    aspect-ratio: 1/1; /* Back to quadratic or slightly tall */
+    min-height: 0; /* Allow shrinking */
+    border-radius: 0;
+    padding: 0;
+    font-size: 0.75rem;
   }
   
   .board-cell-letter {
-    font-size: 1rem; /* Readable size */
-    margin-top: 4px; /* Push letter down slightly */
+    font-size: 0.9rem; 
+    margin-top: 0;
+    line-height: 1.2;
   }
   
   .board-cell-score {
-    font-size: 0.45rem; /* Tiny exponent score */
+    font-size: 0.4rem; 
     right: 1px;
-    top: 1px;
+    top: 0;
+  }
+
+  #rack {
+    margin-top: 0;
+    gap: 6px;
+    justify-content: center;
   }
 
   .tile-btn {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 1.2rem;
-    padding: 6px;
+    min-width: 38px;
+    min-height: 38px; /* Slightly smaller rack tiles */
+    font-size: 1.1rem;
+    padding: 4px;
   }
   
-  .tile-btn span {
-    font-size: 0.6rem;
-  }
-
   .rack-actions {
+    margin-top: 8px;
     flex-direction: row; 
     justify-content: center;
+    gap: 8px;
   }
   
   .rack-actions button {
-    padding: 12px;
-    font-size: 0.9rem;
+    padding: 8px 12px;
+    font-size: 0.85rem;
     flex: 1; 
   }
 }

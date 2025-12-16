@@ -569,27 +569,35 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 720px) {
+  .board-wrapper {
+    overflow-x: hidden; /* Disable scrolling */
+    padding: 4px; /* Minimal padding */
+    display: block; /* Reset flex display */
+  }
+
   .board-grid {
-    /* Keep cells large enough for touch (approx 38px) */
-    grid-template-columns: repeat(15, 38px); 
-    gap: 4px;
-    width: max-content; /* Force grid to take required width */
+    /* Fit exactly to width, 15 columns */
+    grid-template-columns: repeat(15, 1fr); 
+    gap: 1px; /* Minimal gap */
+    width: 100%;
   }
 
   .board-cell {
-    height: 38px; /* Fixed height matching width */
-    min-height: 38px;
-    padding: 2px;
-    font-size: 0.9rem;
+    aspect-ratio: auto; /* Allow non-quadratic shape */
+    min-height: 36px; /* Taller rectangular shape */
+    border-radius: 0; /* Remove curves to maximize space */
+    padding: 1px;
+    font-size: 0.8rem;
   }
   
   .board-cell-letter {
-    font-size: 1.1rem; 
+    font-size: 1rem; /* Readable size */
+    margin-top: 4px; /* Push letter down slightly */
   }
   
   .board-cell-score {
-    font-size: 0.5rem; 
-    right: 2px;
+    font-size: 0.45rem; /* Tiny exponent score */
+    right: 1px;
     top: 1px;
   }
 

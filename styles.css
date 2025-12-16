@@ -564,6 +564,7 @@ button:not(:disabled):hover {
     width: 100%;
     overflow: hidden; 
     justify-content: flex-start;
+    padding-bottom: 8px; /* Add a little padding below the board */
   }
   
   .board-wrapper {
@@ -578,7 +579,7 @@ button:not(:disabled):hover {
     justify-content: center;
     flex: 1;
     border-radius: 0;
-    background: #B0B0B0; /* Explicitly restore the Grey used on desktop */
+    background: #444; /* Dark grey background for board wrapper */
   }
 
   /* Hide the big title and text on mobile */
@@ -622,7 +623,7 @@ button:not(:disabled):hover {
 @media (max-width: 720px) {
   .board-grid {
     grid-template-columns: repeat(15, 1fr); 
-    gap: 1px;
+    gap: 2px; /* Slightly increase gap */
     width: 100%;
     /* Ensure aspect ratio fits within the available view area, 
        but prioritize width filling. 
@@ -638,7 +639,7 @@ button:not(:disabled):hover {
     border-radius: 0;
     padding: 0;
     font-size: 0.75rem;
-    background-color: #2a2a2a; /* Fallback */
+    background-color: #666; /* Lighter grey for empty fields */
   }
   
   .board-cell-letter {

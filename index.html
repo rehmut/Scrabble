@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scrabble · Deutsch</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="panel panel--scores">
+      <div class="panel-header">
+        <div>
+          <p class="label">Spielübersicht</p>
+          <h2>Spieler & Punkte</h2>
+        </div>
+        <div class="dictionary-chip" id="dictionaryChip">Wörterbuch lädt …</div>
+      </div>
+      <ul class="player-list" id="playerList"></ul>
+      <div class="bag-info">
+        <div>
+          <p class="label">Steine im Beutel</p>
+          <strong id="bagCount">102</strong>
+        </div>
+        <div>
+          <p class="label">Zughistorie</p>
+        </div>
+      </div>
+      <div class="history" id="historyPanel">
+        <ul id="historyList"></ul>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <div class="board-wrapper">
+        <div class="board-header">
+          <div>
+            <h1>Scrabble</h1>
+            <p>Deutsch · Mehrspieler</p>
+          </div>
+          <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
+        </div>
+        <div id="board" class="board-grid" role="grid" aria-label="Scrabble-Spielbrett"></div>
+      </div>
+
+      <section class="rack-wrapper">
+        <div class="rack-header">
+          <div>
+            <p class="label">Aktiver Spieler</p>
+            <h2 id="currentPlayerLabel">–</h2>
+          </div>
+          <div class="turn-info">
+            <span id="turnCounter">Zug 1</span>
+          </div>
+        </div>
+        <div id="rack" class="rack-tiles" role="listbox" aria-label="Spielersteine"></div>
+        <div class="rack-actions">
+          <button id="submitMoveBtn" class="primary" disabled>Zug abschließen</button>
+          <button id="recallBtn" disabled>Zurückholen</button>
+          <button id="shuffleBtn" disabled>Mischen</button>
+          <button id="exchangeBtn" disabled>Austauschen</button>
+          <button id="passBtn" disabled>Passen</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="startOverlay" class="overlay is-visible">
+    <div class="overlay-card">
+      <h2>Neues Spiel starten</h2>
+      <p>Trage 2–4 Spielernamen ein. Die Regeln orientieren sich am offiziellen deutschen Scrabble.</p>
+      <form id="playerForm">
+        <div class="player-inputs" id="playerInputList"></div>
+        <div class="form-actions">
+          <button type="button" id="addPlayerField">+ Spieler hinzufügen</button>
+          <button type="submit" class="primary">Spiel starten</button>
+        </div>
+      </form>
+      <p class="dictionary-hint">Das Wörterbuch wird automatisch geladen. Offline steht eine kompakte Liste als Fallback bereit.</p>
+    </div>
+  </div>
+
+  <div id="blankModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Blanko-Plättchen</h3>
+        <button class="icon-btn" data-close-blank>&times;</button>
+      </div>
+      <p>Wähle den gewünschten Buchstaben für dein leeres Plättchen.</p>
+      <div id="blankChoices" class="blank-grid"></div>
+    </div>
+  </div>
+
+  <div id="exchangeModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Steine austauschen</h3>
+        <button class="icon-btn" data-close-exchange>&times;</button>
+      </div>
+      <p>Markiere die Steine, die du gegen neue eintauschen möchtest (Beutel &ge; 7).</p>
+      <div id="exchangeChoices" class="rack-tiles rack-tiles--compact"></div>
+      <div class="form-actions">
+        <button id="confirmExchangeBtn" class="primary" disabled>Tausch bestätigen</button>
+        <button id="cancelExchangeBtn" type="button">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/dictionary.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>
+

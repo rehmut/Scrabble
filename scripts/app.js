@@ -562,25 +562,71 @@ function handleBoardClick(e) {
       localState.placements.set(tile.id, { row, col, tile });
       localState.selectedRackIndex = null;
       
-      // Explicitly check for blank tile to open modal
-      if (tile.isBlank) {
-        // Reset assigned letter if it was set previously (e.g. recalled)
-        tile.assignedLetter = null;
-        openBlankModal(tile, row, col);
-      } else {
-        renderRack();
-        renderBoard();
-        updateControls();
-      }}
-
-function openBlankModal(tile, row, col) {
-  localState.pendingBlank = { tileId: tile.id, row, col };
-  elements.blankModal.classList.add('show');
-}
-function closeBlankModal() {
-  elements.blankModal.classList.remove('show');
-  localState.pendingBlank = null;
-}
+        // Explicitly check for blank tile to open modal
+      
+        if (tile.isBlank) {
+      
+          // Debugging: Alert to confirm logic entry
+      
+          // alert('Joker placed! Opening selection...'); 
+      
+          
+      
+          // Reset assigned letter if it was set previously (e.g. recalled)
+      
+          tile.assignedLetter = null;
+      
+          openBlankModal(tile, row, col);
+      
+        } else {
+      
+          renderRack();
+      
+          renderBoard();
+      
+          updateControls();
+      
+        }
+      
+      }
+      
+      
+      
+      function openBlankModal(tile, row, col) {
+      
+        localState.pendingBlank = { tileId: tile.id, row, col };
+      
+        elements.blankModal.classList.add('show');
+      
+        // Force visibility styles in case class fails
+      
+        elements.blankModal.style.display = 'flex';
+      
+        elements.blankModal.style.opacity = '1';
+      
+        elements.blankModal.style.pointerEvents = 'all';
+      
+      }
+      
+      
+      
+      function closeBlankModal() {
+      
+        elements.blankModal.classList.remove('show');
+      
+        // Reset forced styles
+      
+        elements.blankModal.style.display = '';
+      
+        elements.blankModal.style.opacity = '';
+      
+        elements.blankModal.style.pointerEvents = '';
+      
+        
+      
+        localState.pendingBlank = null;
+      
+      }
 function applyBlankLetter(l) {
   if (!localState.pendingBlank) return;
   const { tileId } = localState.pendingBlank;

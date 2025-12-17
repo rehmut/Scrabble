@@ -63,6 +63,8 @@
           <button id="shuffleBtn" disabled>Mischen</button>
           <button id="exchangeBtn" disabled>Austauschen</button>
           <button id="passBtn" disabled>Passen</button>
+          <button id="leaveBtn" class="danger"
+            style="background: rgba(255, 95, 126, 0.2); color: var(--danger);">Verlassen</button>
         </div>
       </section>
     </main>
@@ -77,6 +79,12 @@
       <div class="player-inputs">
         <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
         <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
+        <select id="lobbyMaxPlayers"
+          style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.25); color: var(--text); font-size: 1rem;">
+          <option value="2">2 Spieler</option>
+          <option value="3">3 Spieler</option>
+          <option value="4">4 Spieler</option>
+        </select>
       </div>
       <div class="form-actions" style="margin-top: 20px;">
         <button id="joinGameBtn" class="primary" style="width: 100%;">Spiel beitreten / starten</button>

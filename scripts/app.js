@@ -175,7 +175,9 @@ const elements = {
   dictionaryChip: document.getElementById('dictionaryChip'),
   mobileHistoryBtn: document.getElementById('mobileHistoryBtn'),
   historyModal: document.getElementById('historyModal'),
-  mobileHistoryList: document.getElementById('mobileHistoryList')
+  mobileHistoryList: document.getElementById('mobileHistoryList'),
+  lobbyMaxPlayers: document.getElementById('lobbyMaxPlayers'),
+  leaveBtn: document.getElementById('leaveBtn')
 };
 
 // --- FIREBASE REFERENCES ---
@@ -230,6 +232,7 @@ function buildBlankChoices() {
 function handleJoinGame() {
   const name = elements.lobbyPlayerName.value.trim();
   const gameId = elements.lobbyGameId.value.trim().toUpperCase();
+  const maxPlayers = parseInt(elements.lobbyMaxPlayers.value, 10) || 4;
 
   if (!name || !gameId) {
     elements.lobbyStatus.textContent = 'Bitte Name und Spiel-ID eingeben.';
@@ -254,7 +257,7 @@ function handleJoinGame() {
       if (snapshot.exists()) {
         joinExistingGame(snapshot.val(), name);
       } else {
-        createNewGame(name);
+        createNewGame(name, maxPlayers);
       }
     }).catch(err => {
       console.error(err);
@@ -284,7 +287,8 @@ function joinExistingGame(data, playerName) {
   if (existingPlayer) {
     startGameListener();
   } else {
-    if (players.length >= 4) { elements.lobbyStatus.textContent = 'Spiel voll.'; return; }
+    const limit = data.maxPlayers || 4;
+    if (players.length >= limit) { elements.lobbyStatus.textContent = `Spiel voll (Max ${limit}).`; return; }
     if (data.gameOver) { elements.lobbyStatus.textContent = 'Spiel beendet.'; return; }
 
     const newPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
@@ -296,13 +300,14 @@ function joinExistingGame(data, playerName) {
   }
 }
 
-function createNewGame(playerName) {
+function createNewGame(playerName, maxPlayers = 4) {
   const idRef = { value: 1 };
   const bag = buildBagWithIds(idRef);
   const initialPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
   drawTilesForPlayer(initialPlayer, bag);
 
   const newGameData = {
+    maxPlayers: maxPlayers,
     board: createBoard(),
     bag: bag,
     players: [initialPlayer],
@@ -331,6 +336,9 @@ function startGameListener() {
 
       syncLocalState();
       renderEverything();
+    } else {
+      // Game deleted or null
+      location.reload();
     }
   });
 }
@@ -763,6 +771,49 @@ function handleConfirmExchange() {
 function closeExchangeModal() {
   elements.exchangeModal.classList.remove('show');
   localState.exchangeSelection.clear();
+}
+
+function handleLeaveGame() {
+  if (!confirm('Möchtest du das Spiel wirklich verlassen?')) return;
+
+  const pIdx = gameState.players.findIndex(p => p.id === localState.myPlayerId);
+  if (pIdx === -1) { location.reload(); return; }
+
+  const newPlayers = [...gameState.players];
+  const leavingPlayer = newPlayers[pIdx];
+  newPlayers.splice(pIdx, 1);
+
+  // Return tiles to bag
+  const bag = [...(gameState.bag || []), ...(leavingPlayer.rack || [])];
+  shuffle(bag);
+
+  if (newPlayers.length === 0) {
+    // Delete game if empty
+    gameRef.remove().then(() => location.reload());
+  } else {
+    const updates = {};
+    updates['players'] = newPlayers;
+    updates['bag'] = bag;
+
+    // Adjust current player index
+    if (gameState.currentPlayerIndex >= newPlayers.length) {
+      updates['currentPlayerIndex'] = 0;
+    } else if (pIdx < gameState.currentPlayerIndex) {
+      updates['currentPlayerIndex'] = gameState.currentPlayerIndex - 1;
+    }
+    // If it was my turn, pass turn to next
+    if (localState.isMyTurn) {
+      updates['turn'] = gameState.turn + 1;
+      updates['passes'] = 0;
+    }
+
+    const hist = [...(gameState.history || [])];
+    hist.unshift({ message: `${leavingPlayer.name} hat das Spiel verlassen.` });
+    updates['history'] = hist;
+    updates['lastActive'] = Date.now();
+
+    gameRef.update(updates).then(() => location.reload());
+  }
 }
 
 function handleSubmitMove() {

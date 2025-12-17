@@ -287,6 +287,10 @@ function joinExistingGame(data, playerName) {
   if (existingPlayer) {
     startGameListener();
   } else {
+    if (data.turn > 1) {
+      elements.lobbyStatus.textContent = 'Spiel läuft bereits (Raum geschlossen).';
+      return;
+    }
     const limit = data.maxPlayers || 4;
     if (players.length >= limit) { elements.lobbyStatus.textContent = `Spiel voll (Max ${limit}).`; return; }
     if (data.gameOver) { elements.lobbyStatus.textContent = 'Spiel beendet.'; return; }
@@ -515,6 +519,17 @@ function renderPlayers() {
     const name = document.createElement('span');
     name.className = 'player-name';
     name.textContent = player.name + (player.id === localState.myPlayerId ? ' (Du)' : '');
+
+    // Kick Button Check
+    if (canKick(player)) {
+      const kickBtn = document.createElement('button');
+      kickBtn.className = 'kick-btn';
+      kickBtn.innerHTML = '&times;';
+      kickBtn.title = 'Spieler entfernen';
+      kickBtn.onclick = (e) => { e.stopPropagation(); handleKickPlayer(player.id); };
+      name.appendChild(kickBtn);
+    }
+
     const score = document.createElement('span');
     score.className = 'player-score';
     score.textContent = player.score;
@@ -1012,3 +1027,146 @@ function playTurnSound() {
     osc.stop(ctx.currentTime + 0.5);
   } catch (e) { console.error('Audio error', e); }
 }
+
+// --- CHAT FEATURE ---
+function bindChatEvents() {
+  const btn = document.getElementById('floatingChatBtn');
+  const modal = document.getElementById('chatModal');
+  const closeBtn = modal.querySelector('[data-close-chat]');
+  const form = document.getElementById('chatForm');
+  const input = document.getElementById('chatInput');
+
+  if (btn) btn.addEventListener('click', () => {
+    modal.classList.add('show');
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'all';
+    document.getElementById('chatBadge').classList.add('hidden');
+    localState.unreadChatCount = 0;
+    scrollToBottomChat();
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    modal.classList.remove('show');
+    modal.style.opacity = '0';
+    modal.style.pointerEvents = 'none';
+  });
+
+  if (form) form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const txt = input.value.trim();
+    if (txt) {
+      sendChatMessage(txt);
+      input.value = '';
+    }
+  });
+}
+
+function sendChatMessage(text) {
+  if (!gameRef) return;
+  const player = getCurrentPlayerObj();
+  const msg = {
+    senderId: localState.myPlayerId,
+    senderName: player ? player.name : 'Gast',
+    text: text,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  };
+  gameRef.child('chat').push(msg);
+}
+
+function initChatListener() {
+  if (!gameRef) return;
+  const chatList = document.getElementById('chatMessages');
+  gameRef.child('chat').limitToLast(50).on('child_added', (snapshot) => {
+    const msg = snapshot.val();
+    renderChatMessage(msg);
+    if (!document.getElementById('chatModal').classList.contains('show')) {
+      // Increment unread if closed
+      const badge = document.getElementById('chatBadge');
+      badge.classList.remove('hidden');
+      badge.textContent = '!';
+    } else {
+      scrollToBottomChat();
+    }
+  });
+}
+
+function renderChatMessage(msg) {
+  const chatList = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  const isMine = msg.senderId === localState.myPlayerId;
+  div.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
+
+  if (!isMine) {
+    const meta = document.createElement('span');
+    meta.className = 'chat-meta';
+    meta.textContent = msg.senderName;
+    div.appendChild(meta);
+  }
+
+  const text = document.createTextNode(msg.text);
+  div.appendChild(text);
+  chatList.appendChild(div);
+}
+
+function scrollToBottomChat() {
+  const chatList = document.getElementById('chatMessages');
+  chatList.scrollTop = chatList.scrollHeight;
+}
+
+// --- KICK FEATURE ---
+function canKick(targetPlayer) {
+  const me = getCurrentPlayerObj();
+  if (!me || me.score <= 0) return false; // I must have points > 0
+  if (targetPlayer.score > 0) return false; // Target must have 0 points
+  if (targetPlayer.id === me.id) return false; // Cannot kick self
+  return true;
+}
+
+function handleKickPlayer(targetId) {
+  if (!confirm('Diesen Spieler entfernen?')) return;
+  const pIdx = gameState.players.findIndex(p => p.id === targetId);
+  if (pIdx > -1) {
+    // Treat as leaving game
+    handleRemoteKick(pIdx);
+  }
+}
+
+function handleRemoteKick(pIdx) {
+  const newPlayers = [...gameState.players];
+  const kickedPlayer = newPlayers[pIdx];
+  newPlayers.splice(pIdx, 1);
+
+  // Return tiles
+  const bag = [...(gameState.bag || []), ...(kickedPlayer.rack || [])];
+  shuffle(bag);
+
+  const updates = {};
+  updates['players'] = newPlayers;
+  updates['bag'] = bag;
+
+  // Adjust current player index logic similar to leaving
+  if (gameState.currentPlayerIndex >= newPlayers.length) {
+    updates['currentPlayerIndex'] = 0;
+  } else if (pIdx < gameState.currentPlayerIndex) {
+    updates['currentPlayerIndex'] = gameState.currentPlayerIndex - 1;
+  }
+
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `${kickedPlayer.name} wurde entfernt.` });
+  updates['history'] = hist;
+
+  gameRef.update(updates);
+}
+
+// Hook into Init
+const originalBindEvents = bindEvents;
+bindEvents = function () {
+  originalBindEvents();
+  bindChatEvents();
+};
+
+const originalStartGame = startGameListener;
+startGameListener = function () {
+  originalStartGame();
+  initChatListener();
+};

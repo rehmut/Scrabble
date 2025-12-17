@@ -153,6 +153,24 @@
     </div>
   </div>
 
+  <div id="chatModal" class="modal">
+    <div class="modal-card chat-card">
+      <div class="modal-header">
+        <h3>Chat</h3>
+        <button class="icon-btn" data-close-chat>&times;</button>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <form id="chatForm" class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Nachricht..." autocomplete="off" />
+        <button type="submit" class="primary">Senden</button>
+      </form>
+    </div>
+  </div>
+
+  <button id="floatingChatBtn" class="floating-chat-btn">
+    Chat <span id="chatBadge" class="chat-badge hidden"></span>
+  </button>
+
   <!-- Firebase SDKs (Compat versions for easier local usage without modules) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>

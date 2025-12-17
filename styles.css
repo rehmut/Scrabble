@@ -641,6 +641,8 @@ button:not(:disabled):hover {
     font-size: 0.75rem;
     padding: 4px 8px;
     background: transparent;
+    pointer-events: none;
+    /* Prevent blocking clicks on board */
   }
 
   .rack-wrapper {
@@ -688,7 +690,6 @@ button:not(:disabled):hover {
   .board-cell-letter {
     font-size: 4.5vw;
     /* Responsive font size relative to viewport width */
-    max-font-size: 1.2rem;
     margin-top: 0;
     line-height: 100%;
     display: flex;

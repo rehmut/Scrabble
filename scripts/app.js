@@ -15,6 +15,7 @@ const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
 const BINGO_BONUS = 50;
 const REMOTE_DICTIONARY_SOURCES = [
+  'https://raw.githubusercontent.com/kamilmielnik/scrabble-dictionaries/master/german/german.txt', // Better source
   'https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/de/de_50k.txt',
   'https://raw.githubusercontent.com/enz/german-wordlist/master/german.dic'
 ];
@@ -558,11 +559,19 @@ function handleBoardClick(e) {
     setStatus('Feld belegt.', 'error'); return;
   }
   
-  localState.placements.set(tile.id, { row, col, tile });
-  localState.selectedRackIndex = null;
-  if (tile.isBlank && !tile.assignedLetter) openBlankModal(tile, row, col);
-  else { renderRack(); renderBoard(); updateControls(); }
-}
+      localState.placements.set(tile.id, { row, col, tile });
+      localState.selectedRackIndex = null;
+      
+      // Explicitly check for blank tile to open modal
+      if (tile.isBlank) {
+        // Reset assigned letter if it was set previously (e.g. recalled)
+        tile.assignedLetter = null;
+        openBlankModal(tile, row, col);
+      } else {
+        renderRack();
+        renderBoard();
+        updateControls();
+      }}
 
 function openBlankModal(tile, row, col) {
   localState.pendingBlank = { tileId: tile.id, row, col };

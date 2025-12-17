@@ -53,7 +53,7 @@ const GERMAN_TILES = [
   { letter: '?', count: 2, value: 0, isBlank: true }
 ];
 
-const BLANK_CHOICES = ['A','Ä','B','C','D','E','F','G','H','I','J','K','L','M','N','O','Ö','P','Q','R','S','T','U','Ü','V','W','X','Y','Z'];
+const BLANK_CHOICES = ['A', 'Ä', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 'R', 'S', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z'];
 
 const FALLBACK_WORDS = [
   "aber", "abend", "abfahrt", "abgabe", "abitur", "ablauf", "abschied", "absicht", "acht", "achtung", "adresse",
@@ -172,7 +172,10 @@ const elements = {
   exchangeChoices: document.getElementById('exchangeChoices'),
   confirmExchangeBtn: document.getElementById('confirmExchangeBtn'),
   cancelExchangeBtn: document.getElementById('cancelExchangeBtn'),
-  dictionaryChip: document.getElementById('dictionaryChip')
+  dictionaryChip: document.getElementById('dictionaryChip'),
+  mobileHistoryBtn: document.getElementById('mobileHistoryBtn'),
+  historyModal: document.getElementById('historyModal'),
+  mobileHistoryList: document.getElementById('mobileHistoryList')
 };
 
 // --- FIREBASE REFERENCES ---
@@ -196,6 +199,21 @@ function bindEvents() {
   elements.exchangeModal.querySelector('[data-close-exchange]').addEventListener('click', closeExchangeModal);
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
+
+  if (elements.mobileHistoryBtn) {
+    elements.mobileHistoryBtn.addEventListener('click', () => {
+      elements.historyModal.classList.add('show');
+      elements.historyModal.style.opacity = '1';
+      elements.historyModal.style.pointerEvents = 'all';
+    });
+  }
+  if (elements.historyModal) {
+    elements.historyModal.querySelector('[data-close-history]').addEventListener('click', () => {
+      elements.historyModal.classList.remove('show');
+      elements.historyModal.style.opacity = '';
+      elements.historyModal.style.pointerEvents = '';
+    });
+  }
 }
 
 function buildBlankChoices() {
@@ -227,7 +245,7 @@ function handleJoinGame() {
 
   try {
     if (!firebase.apps.length) {
-       firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp(firebaseConfig);
     }
     db = firebase.database();
     gameRef = db.ref(`games/${gameId}`);
@@ -268,11 +286,11 @@ function joinExistingGame(data, playerName) {
   } else {
     if (players.length >= 4) { elements.lobbyStatus.textContent = 'Spiel voll.'; return; }
     if (data.gameOver) { elements.lobbyStatus.textContent = 'Spiel beendet.'; return; }
-    
+
     const newPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
     const bag = [...(data.bag || [])];
     drawTilesForPlayer(newPlayer, bag);
-    
+
     players.push(newPlayer);
     gameRef.update({ players, bag, lastActive: Date.now() }).then(startGameListener);
   }
@@ -310,7 +328,7 @@ function startGameListener() {
       if (!gameState.players) gameState.players = [];
       if (!gameState.bag) gameState.bag = [];
       if (!gameState.history) gameState.history = [];
-      
+
       syncLocalState();
       renderEverything();
     }
@@ -319,7 +337,13 @@ function startGameListener() {
 
 function syncLocalState() {
   const myPlayerIndex = gameState.players.findIndex(p => p.id === localState.myPlayerId);
+  const wasMyTurn = localState.isMyTurn;
   localState.isMyTurn = (myPlayerIndex === gameState.currentPlayerIndex) && !gameState.gameOver;
+
+  if (!wasMyTurn && localState.isMyTurn && gameState.turn > 1) {
+    playTurnSound();
+  }
+
   if (!localState.isMyTurn && localState.placements.size > 0) handleRecall();
 }
 
@@ -361,10 +385,10 @@ function buildMultiplierMatrix() {
   const matrix = Array.from({ length: BOARD_SIZE }, () => (
     Array.from({ length: BOARD_SIZE }, () => ({ word: 1, letter: 1, isCenter: false }))
   ));
-  const tripleWord = [[0,0],[0,7],[0,14],[7,0],[7,14],[14,0],[14,7],[14,14]];
-  const doubleWord = [[1,1],[2,2],[3,3],[4,4],[1,13],[2,12],[3,11],[4,10],[10,4],[11,3],[12,2],[13,1],[10,10],[11,11],[12,12],[13,13],[7,7]];
-  const tripleLetter = [[1,5],[1,9],[5,1],[5,5],[5,9],[5,13],[9,1],[9,5],[9,9],[9,13],[13,5],[13,9]];
-  const doubleLetter = [[0,3],[0,11],[2,6],[2,8],[3,0],[3,7],[3,14],[6,2],[6,6],[6,8],[6,12],[7,3],[7,11],[8,2],[8,6],[8,8],[8,12],[11,0],[11,7],[11,14],[12,6],[12,8],[14,3],[14,11]];
+  const tripleWord = [[0, 0], [0, 7], [0, 14], [7, 0], [7, 14], [14, 0], [14, 7], [14, 14]];
+  const doubleWord = [[1, 1], [2, 2], [3, 3], [4, 4], [1, 13], [2, 12], [3, 11], [4, 10], [10, 4], [11, 3], [12, 2], [13, 1], [10, 10], [11, 11], [12, 12], [13, 13], [7, 7]];
+  const tripleLetter = [[1, 5], [1, 9], [5, 1], [5, 5], [5, 9], [5, 13], [9, 1], [9, 5], [9, 9], [9, 13], [13, 5], [13, 9]];
+  const doubleLetter = [[0, 3], [0, 11], [2, 6], [2, 8], [3, 0], [3, 7], [3, 14], [6, 2], [6, 6], [6, 8], [6, 12], [7, 3], [7, 11], [8, 2], [8, 6], [8, 8], [8, 12], [11, 0], [11, 7], [11, 14], [12, 6], [12, 8], [14, 3], [14, 11]];
 
   tripleWord.forEach(([r, c]) => { matrix[r][c].word = 3; });
   doubleWord.forEach(([r, c]) => {
@@ -384,7 +408,7 @@ function renderEverything() {
   renderHistory();
   updateControls();
   updateTurnInfo();
-  
+
   if (gameState.gameOver) {
     const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
     setStatus(`Spiel vorbei! Sieger: ${winnerName}`, 'success');
@@ -400,7 +424,7 @@ function renderBoard() {
   const fragment = document.createDocumentFragment();
   // Safe copy for display
   const displayBoard = gameState.board.map(row => row.map(cell => ({ ...cell })))
-  
+
   localState.placements.forEach(({ row, col, tile }) => {
     displayBoard[row][col] = {
       ...displayBoard[row][col],
@@ -419,19 +443,19 @@ function renderBoard() {
       cellEl.dataset.row = rowIndex;
       cellEl.dataset.col = colIndex;
       cellEl.dataset.label = getCellLabel(cell);
-      
+
       const m = cell.multiplier || gameState.board[rowIndex][colIndex].multiplier;
       if (m.word === 2) cellEl.classList.add('cell-word2');
       if (m.word === 3) cellEl.classList.add('cell-word3');
       if (m.letter === 2) cellEl.classList.add('cell-letter2');
       if (m.letter === 3) cellEl.classList.add('cell-letter3');
       if (m.isCenter) cellEl.classList.add('cell-center');
-      
+
       if (cell.letter) {
         cellEl.classList.add('has-letter');
         if (cell.locked) cellEl.classList.add('locked-letter');
         else cellEl.classList.add('new-letter');
-        
+
         cellEl.innerHTML = `<span class="board-cell-letter">${cell.letter}</span><span class="board-cell-score">${cell.value}</span>`;
       }
       fragment.appendChild(cellEl);
@@ -459,7 +483,7 @@ function renderRack() {
   const player = getCurrentPlayerObj();
   elements.rack.innerHTML = '';
   if (!player || !player.rack) return;
-  
+
   const placedIds = new Set(localState.placements.keys());
   const rackTiles = player.rack.filter(t => !placedIds.has(t.id));
 
@@ -467,7 +491,7 @@ function renderRack() {
   rackTiles.forEach((tile, index) => {
     const btn = document.createElement('button');
     btn.className = 'tile-btn' + (tile.isBlank ? ' blank' : '') + (localState.selectedRackIndex === index ? ' selected' : '');
-    btn.dataset.index = index; 
+    btn.dataset.index = index;
     btn.innerHTML = `${tile.assignedLetter || tile.letter}<span>${tile.value}</span>`;
     fragment.appendChild(btn);
   });
@@ -504,6 +528,18 @@ function renderHistory() {
     fragment.appendChild(li);
   });
   elements.historyList.appendChild(fragment);
+
+  // Also populate mobile history
+  if (elements.mobileHistoryList) {
+    elements.mobileHistoryList.innerHTML = '';
+    const mobileFragment = document.createDocumentFragment();
+    (gameState.history || []).forEach(entry => {
+      const li = document.createElement('li');
+      li.textContent = entry.message;
+      mobileFragment.appendChild(li);
+    });
+    elements.mobileHistoryList.appendChild(mobileFragment);
+  }
 }
 
 function updateTurnInfo() {
@@ -539,7 +575,7 @@ function handleBoardClick(e) {
   if (!cellEl) return;
   const row = Number(cellEl.dataset.row);
   const col = Number(cellEl.dataset.col);
-  
+
   const existingLocal = Array.from(localState.placements.values()).find(p => p.row === row && p.col === col);
   if (existingLocal) {
     localState.placements.delete(existingLocal.tile.id);
@@ -548,85 +584,85 @@ function handleBoardClick(e) {
   }
   if (gameState.board[row][col].locked) return;
   if (localState.selectedRackIndex === null) { setStatus('Stein wählen.', 'info'); return; }
-  
+
   const player = getCurrentPlayerObj();
   const placedIds = new Set(localState.placements.keys());
   const visibleRack = player.rack.filter(t => !placedIds.has(t.id));
   const tile = visibleRack[localState.selectedRackIndex];
-  
+
   if (!tile) return;
   if (Array.from(localState.placements.values()).some(p => p.row === row && p.col === col)) {
     setStatus('Feld belegt.', 'error'); return;
   }
-  
-      localState.placements.set(tile.id, { row, col, tile });
-      localState.selectedRackIndex = null;
-      
-        // Explicitly check for blank tile to open modal
-      
-        if (tile.isBlank) {
-      
-          // Debugging: Alert to confirm logic entry
-      
-          // alert('Joker placed! Opening selection...'); 
-      
-          
-      
-          // Reset assigned letter if it was set previously (e.g. recalled)
-      
-          tile.assignedLetter = null;
-      
-          openBlankModal(tile, row, col);
-      
-        } else {
-      
-          renderRack();
-      
-          renderBoard();
-      
-          updateControls();
-      
-        }
-      
-      }
-      
-      
-      
-      function openBlankModal(tile, row, col) {
-      
-        localState.pendingBlank = { tileId: tile.id, row, col };
-      
-        elements.blankModal.classList.add('show');
-      
-        // Force visibility styles in case class fails
-      
-        elements.blankModal.style.display = 'flex';
-      
-        elements.blankModal.style.opacity = '1';
-      
-        elements.blankModal.style.pointerEvents = 'all';
-      
-      }
-      
-      
-      
-      function closeBlankModal() {
-      
-        elements.blankModal.classList.remove('show');
-      
-        // Reset forced styles
-      
-        elements.blankModal.style.display = '';
-      
-        elements.blankModal.style.opacity = '';
-      
-        elements.blankModal.style.pointerEvents = '';
-      
-        
-      
-        localState.pendingBlank = null;
-      
-      }
+
+  localState.placements.set(tile.id, { row, col, tile });
+  localState.selectedRackIndex = null;
+
+  // Explicitly check for blank tile to open modal
+
+  if (tile.isBlank) {
+
+    // Debugging: Alert to confirm logic entry
+
+    // alert('Joker placed! Opening selection...'); 
+
+
+
+    // Reset assigned letter if it was set previously (e.g. recalled)
+
+    tile.assignedLetter = null;
+
+    openBlankModal(tile, row, col);
+
+  } else {
+
+    renderRack();
+
+    renderBoard();
+
+    updateControls();
+
+  }
+
+}
+
+
+
+function openBlankModal(tile, row, col) {
+
+  localState.pendingBlank = { tileId: tile.id, row, col };
+
+  elements.blankModal.classList.add('show');
+
+  // Force visibility styles in case class fails
+
+  elements.blankModal.style.display = 'flex';
+
+  elements.blankModal.style.opacity = '1';
+
+  elements.blankModal.style.pointerEvents = 'all';
+
+}
+
+
+
+function closeBlankModal() {
+
+  elements.blankModal.classList.remove('show');
+
+  // Reset forced styles
+
+  elements.blankModal.style.display = '';
+
+  elements.blankModal.style.opacity = '';
+
+  elements.blankModal.style.pointerEvents = '';
+
+
+
+  localState.pendingBlank = null;
+
+}
 function applyBlankLetter(l) {
   if (!localState.pendingBlank) return;
   const { tileId } = localState.pendingBlank;
@@ -695,30 +731,30 @@ function handleConfirmExchange() {
   const player = getCurrentPlayerObj();
   const playerIndex = gameState.players.findIndex(p => p.id === player.id);
   const selectedIds = localState.exchangeSelection;
-  
+
   const tilesToTrade = player.rack.filter(t => selectedIds.has(t.id));
   const keepTiles = player.rack.filter(t => !selectedIds.has(t.id));
-  
+
   const bag = [...(gameState.bag || []), ...tilesToTrade];
   shuffle(bag);
-  
+
   while (keepTiles.length < RACK_SIZE && bag.length > 0) {
     const idx = Math.floor(Math.random() * bag.length);
     keepTiles.push(bag.splice(idx, 1)[0]);
   }
-  
+
   const updates = {};
   updates[`players/${playerIndex}/rack`] = keepTiles;
   updates['bag'] = bag;
   updates['passes'] = 0;
   updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
   updates['turn'] = gameState.turn + 1;
-  
+
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `${player.name} tauscht ${selectedIds.size} Steine.` });
   updates['history'] = hist;
   updates['lastActive'] = Date.now();
-  
+
   gameRef.update(updates).then(() => {
     closeExchangeModal();
   });
@@ -732,18 +768,18 @@ function closeExchangeModal() {
 function handleSubmitMove() {
   const val = validateMove();
   if (!val.valid) { setStatus(val.message, 'error'); return; }
-  
+
   const player = getCurrentPlayerObj();
   const pIdx = gameState.players.findIndex(p => p.id === player.id);
   const updates = {};
-  
+
   val.placements.forEach(p => {
     updates[`board/${p.row}/${p.col}/letter`] = p.tile.isBlank ? (p.tile.assignedLetter || '?') : p.tile.letter;
     updates[`board/${p.row}/${p.col}/value`] = p.tile.value;
     updates[`board/${p.row}/${p.col}/locked`] = true;
     updates[`board/${p.row}/${p.col}/tileId`] = p.tile.id;
   });
-  
+
   const usedIds = new Set(val.placements.map(p => p.tile.id));
   const newRack = player.rack.filter(t => !usedIds.has(t.id));
   const bag = [...(gameState.bag || [])];
@@ -751,11 +787,11 @@ function handleSubmitMove() {
     const idx = Math.floor(Math.random() * bag.length);
     newRack.push(bag.splice(idx, 1)[0]);
   }
-  
+
   updates[`players/${pIdx}/rack`] = newRack;
   updates[`players/${pIdx}/score`] = player.score + val.score;
   updates['bag'] = bag;
-  
+
   const words = val.words.map(w => `${w.word} (+${w.score})`).join(', ');
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `${player.name} legt ${words} · ${val.score} Punkte` });
@@ -764,7 +800,7 @@ function handleSubmitMove() {
   updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
   updates['turn'] = gameState.turn + 1;
   updates['lastActive'] = Date.now();
-  
+
   gameRef.update(updates).then(() => {
     localState.placements.clear();
     if (newRack.length === 0 && bag.length === 0) finishGameRemote('out', pIdx);
@@ -774,29 +810,29 @@ function handleSubmitMove() {
 function validateMove() {
   if (!localState.dictionary.size) return { valid: false, message: 'Wörterbuch lädt...' };
   const placements = Array.from(localState.placements.values());
-  const tempBoard = gameState.board.map(r => r.map(c => ({...c})))
+  const tempBoard = gameState.board.map(r => r.map(c => ({ ...c })))
   placements.forEach(p => {
     tempBoard[p.row][p.col].letter = p.tile.isBlank ? (p.tile.assignedLetter || '?') : p.tile.letter;
     tempBoard[p.row][p.col].value = p.tile.value;
   });
-  
+
   const rows = placements.map(p => p.row);
   const cols = placements.map(p => p.col);
   const sameRow = rows.every(r => r === rows[0]);
   const sameCol = cols.every(c => c === cols[0]);
   if (!sameRow && !sameCol) return { valid: false, message: 'Nicht in einer Linie.' };
-  
+
   const orient = sameRow ? 'row' : 'col';
   const boardHasTiles = gameState.board.some(r => r.some(c => c.locked));
-  
+
   const { contiguous, touchesConnection } = checkContiguity(tempBoard, placements, orient, boardHasTiles);
   if (!contiguous) return { valid: false, message: 'Lücken im Wort.' };
   if (!boardHasTiles && !placements.some(p => p.row === 7 && p.col === 7)) return { valid: false, message: 'Mitte muss belegt werden.' };
   if (boardHasTiles && !touchesConnection) return { valid: false, message: 'Muss anschließen.' };
-  
+
   const mainWord = collectWord(tempBoard, placements[0].row, placements[0].col, orient);
   if (!localState.dictionary.has(mainWord.word)) return { valid: false, message: `"${mainWord.word}" unbekannt.` };
-  
+
   const crossWords = [];
   for (const p of placements) {
     const perp = orient === 'row' ? 'col' : 'row';
@@ -806,12 +842,12 @@ function validateMove() {
       crossWords.push(w);
     }
   }
-  
+
   const mainScore = calculateScore(tempBoard, mainWord, placements);
   const crossScores = crossWords.map(w => calculateScore(tempBoard, w, placements));
   let total = mainScore.score + crossScores.reduce((s, w) => s + w.score, 0);
   if (placements.length === 7) total += BINGO_BONUS;
-  
+
   return { valid: true, score: total, words: [mainScore, ...crossScores], placements };
 }
 
@@ -836,8 +872,8 @@ function checkContiguity(board, placements, orient, boardHasTiles) {
   }
   if (!touches && boardHasTiles) {
     touches = placements.some(p => {
-       const n = [[p.row-1, p.col], [p.row+1, p.col], [p.row, p.col-1], [p.row, p.col+1]];
-       return n.some(([r,c]) => r>=0 && r<15 && c>=0 && c<15 && gameState.board[r][c].locked);
+      const n = [[p.row - 1, p.col], [p.row + 1, p.col], [p.row, p.col - 1], [p.row, p.col + 1]];
+      return n.some(([r, c]) => r >= 0 && r < 15 && c >= 0 && c < 15 && gameState.board[r][c].locked);
     });
   }
   return { contiguous: true, touchesConnection: boardHasTiles ? touches : true };
@@ -847,7 +883,7 @@ function collectWord(board, row, col, orient) {
   const dr = orient === 'row' ? 0 : 1;
   const dc = orient === 'row' ? 1 : 0;
   let r = row, c = col;
-  while (r-dr >= 0 && c-dc >= 0 && board[r-dr][c-dc].letter) { r -= dr; c -= dc; }
+  while (r - dr >= 0 && c - dc >= 0 && board[r - dr][c - dc].letter) { r -= dr; c -= dc; }
   const letters = [], positions = [];
   while (r < 15 && c < 15 && board[r][c].letter) {
     letters.push(board[r][c].letter);
@@ -874,9 +910,9 @@ function calculateScore(board, wordInfo, placements) {
 function finishGameRemote(reason, pIdx) {
   const players = [...gameState.players];
   let deduction = 0;
-  players.forEach(p => { const s = p.rack.reduce((a,b)=>a+b.value,0); p.score -= s; deduction += s; });
+  players.forEach(p => { const s = p.rack.reduce((a, b) => a + b.value, 0); p.score -= s; deduction += s; });
   if (pIdx !== undefined) players[pIdx].score += deduction;
-  players.sort((a,b) => b.score - a.score);
+  players.sort((a, b) => b.score - a.score);
   const w = players[0];
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `Spielende! Sieger: ${w.name}` });
@@ -885,7 +921,7 @@ function finishGameRemote(reason, pIdx) {
 
 async function initDictionary() {
   if (window.GERMAN_DICTIONARY && Array.isArray(window.GERMAN_DICTIONARY)) {
-     window.GERMAN_DICTIONARY.forEach(w => localState.dictionary.add(normalizeWord(w)));
+    window.GERMAN_DICTIONARY.forEach(w => localState.dictionary.add(normalizeWord(w)));
   }
   FALLBACK_WORDS.forEach(w => localState.dictionary.add(normalizeWord(w)));
   for (const url of REMOTE_DICTIONARY_SOURCES) {
@@ -897,9 +933,28 @@ async function initDictionary() {
         elements.dictionaryChip.textContent = `Wörterbuch: ${localState.dictionary.size}`;
         break;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
   elements.dictionaryChip.textContent = `Wörterbuch: ${localState.dictionary.size}`;
 }
 function normalizeWord(w) { return w.trim().toUpperCase(); }
-function shuffle(a) { for (let i = a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } }
+
+function playTurnSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // C6
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) { console.error('Audio error', e); }
+}

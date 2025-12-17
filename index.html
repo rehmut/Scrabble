@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scrabble · Deutsch</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="app-shell">
     <aside class="panel panel--scores">
@@ -39,6 +41,7 @@
             <p>Deutsch · Mehrspieler</p>
           </div>
           <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
+          <button id="mobileHistoryBtn" class="mobile-history-btn">Verlauf</button>
         </div>
         <div id="board" class="board-grid" role="grid" aria-label="Scrabble-Spielbrett"></div>
       </div>
@@ -92,7 +95,9 @@
           <input type="text" placeholder="Spieler 1" value="Spieler 1" />
           <input type="text" placeholder="Spieler 2" value="Spieler 2" />
         </div>
-        <button type="button" id="addPlayerField" class="icon-btn" style="margin-bottom: 20px; width: 100%; border-radius: 10px; font-size: 1rem;">+ Weiteren Spieler hinzufügen</button>
+        <button type="button" id="addPlayerField" class="icon-btn"
+          style="margin-bottom: 20px; width: 100%; border-radius: 10px; font-size: 1rem;">+ Weiteren Spieler
+          hinzufügen</button>
         <div class="form-actions">
           <button type="submit" class="primary" style="flex: 1;">Spiel starten</button>
         </div>
@@ -128,12 +133,24 @@
     </div>
   </div>
 
+  <div id="historyModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Spielverlauf</h3>
+        <button class="icon-btn" data-close-history>&times;</button>
+      </div>
+      <div class="history" style="display: block; height: 60vh; margin-top: 10px;">
+        <ul id="mobileHistoryList"></ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase SDKs (Compat versions for easier local usage without modules) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-  
+
   <script src="scripts/dictionary.js"></script>
   <script src="scripts/app.js"></script>
 </body>
-</html>
 
+</html>

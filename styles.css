@@ -851,8 +851,13 @@ button:not(:disabled):hover {
   }
 
   .tile-btn span {
-    display: none;
-    /* Hide points on rack tiles to save space if needed, or make tiny */
+    /* Ensure points are visible but small */
+    display: block;
+    font-size: 0.55rem;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    line-height: 1;
   }
 
   .rack-actions {

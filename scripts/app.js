@@ -1159,11 +1159,8 @@ function handleRemoteKick(pIdx) {
 }
 
 // Hook into Init
-const originalBindEvents = bindEvents;
-bindEvents = function () {
-  originalBindEvents();
-  bindChatEvents();
-};
+// Init Chat Events
+bindChatEvents();
 
 const originalStartGame = startGameListener;
 startGameListener = function () {

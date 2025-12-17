@@ -449,7 +449,7 @@ button:not(:disabled):hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 30;
+  z-index: 1000; /* Ensure it's above everything */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -461,37 +461,16 @@ button:not(:disabled):hover {
   border-radius: 20px;
   width: min(420px, 92vw);
   box-shadow: var(--shadow);
+  max-height: 85vh; /* Prevent overflow on small screens */
+  overflow-y: auto; /* Allow scrolling inside the modal */
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal.show {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.icon-btn {
-  background: rgba(255,255,255,0.08);
-  border-radius: 999px;
-  width: 34px;
-  height: 34px;
-  font-size: 1.3rem;
-}
-
-.blank-grid {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-  gap: 10px;
-}
+/* ... */
 
 .blank-grid button {
   min-height: 48px;
   font-size: 1.1rem;
+  touch-action: manipulation; /* Improve touch response */
 }
 
 .rack-tiles--compact .tile-btn {

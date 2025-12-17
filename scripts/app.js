@@ -180,6 +180,7 @@ let db, gameRef;
 // --- INITIALIZATION ---
 initDictionary();
 bindEvents();
+buildBlankChoices(); // Ensure blank choices are built
 
 function bindEvents() {
   elements.joinGameBtn.addEventListener('click', handleJoinGame);
@@ -194,6 +195,16 @@ function bindEvents() {
   elements.exchangeModal.querySelector('[data-close-exchange]').addEventListener('click', closeExchangeModal);
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
+}
+
+function buildBlankChoices() {
+  elements.blankChoices.innerHTML = '';
+  BLANK_CHOICES.forEach(l => {
+    const btn = document.createElement('button');
+    btn.textContent = l;
+    btn.onclick = () => applyBlankLetter(l);
+    elements.blankChoices.appendChild(btn);
+  });
 }
 
 // --- LOBBY & FIREBASE CONNECT ---

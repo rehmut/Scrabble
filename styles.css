@@ -581,7 +581,7 @@ button:not(:disabled):hover {
     gap: 0;
     width: 100%;
     overflow: hidden;
-    justify-content: flex-start;
+    justify-content: center;
     padding-bottom: 4px;
     /* Add a little padding below the board */
   }
@@ -599,6 +599,7 @@ button:not(:disabled):hover {
     justify-content: center;
     flex: 1;
     border-radius: 0;
+    max-height: 100vw;
     background: #222;
     /* Darker background */
   }
@@ -624,6 +625,8 @@ button:not(:disabled):hover {
 
   /* History Button for Mobile */
   .mobile-history-btn {
+    display: block;
+    margin-left: auto;
     pointer-events: auto;
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -753,6 +756,7 @@ button:not(:disabled):hover {
 .hidden {
   display: none !important;
 }
+
 /* Revert tile styles and optimize mobile layout (Overrides) */
 .tile-btn {
   justify-content: center !important;
@@ -761,7 +765,15 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 1100px) {
-  .main-area { padding-bottom: 2px !important; }
-  .board-wrapper { padding-bottom: 4px !important; }
-  #rack { padding-bottom: 4px !important; }
+  .main-area {
+    padding-bottom: 2px !important;
+  }
+
+  .board-wrapper {
+    padding-bottom: 4px !important;
+  }
+
+  #rack {
+    padding-bottom: 4px !important;
+  }
 }

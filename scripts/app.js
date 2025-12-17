@@ -812,7 +812,10 @@ function handleLeaveGame() {
     updates['history'] = hist;
     updates['lastActive'] = Date.now();
 
-    gameRef.update(updates).then(() => location.reload());
+    gameRef.update(updates).then(() => location.reload()).catch(err => {
+      console.error(err);
+      alert('Fehler beim Verlassen: ' + err.message);
+    });
   }
 }
 

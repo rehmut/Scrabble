@@ -177,7 +177,11 @@ const elements = {
   historyModal: document.getElementById('historyModal'),
   mobileHistoryList: document.getElementById('mobileHistoryList'),
   lobbyMaxPlayers: document.getElementById('lobbyMaxPlayers'),
-  leaveBtn: document.getElementById('leaveBtn')
+  leaveBtn: document.getElementById('leaveBtn'),
+  bagCountInline: document.getElementById('bagCountInline'),
+  rackTileBreakdown: document.getElementById('rackTileBreakdown'),
+  rackTotalBadges: Array.from(document.querySelectorAll('[data-rack-total]')),
+  historyOpeners: Array.from(document.querySelectorAll('[data-open-history]'))
 };
 
 // --- FIREBASE REFERENCES ---
@@ -202,20 +206,27 @@ function bindEvents() {
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
 
-  if (elements.mobileHistoryBtn) {
-    elements.mobileHistoryBtn.addEventListener('click', () => {
-      elements.historyModal.classList.add('show');
-      elements.historyModal.style.opacity = '1';
-      elements.historyModal.style.pointerEvents = 'all';
-    });
+  if (elements.historyModal && elements.historyOpeners.length) {
+    elements.historyOpeners.forEach(btn => btn.addEventListener('click', openHistoryModal));
   }
   if (elements.historyModal) {
-    elements.historyModal.querySelector('[data-close-history]').addEventListener('click', () => {
-      elements.historyModal.classList.remove('show');
-      elements.historyModal.style.opacity = '';
-      elements.historyModal.style.pointerEvents = '';
-    });
+    const closeBtn = elements.historyModal.querySelector('[data-close-history]');
+    if (closeBtn) closeBtn.addEventListener('click', closeHistoryModal);
   }
+}
+
+function openHistoryModal() {
+  if (!elements.historyModal) return;
+  elements.historyModal.classList.add('show');
+  elements.historyModal.style.opacity = '1';
+  elements.historyModal.style.pointerEvents = 'all';
+}
+
+function closeHistoryModal() {
+  if (!elements.historyModal) return;
+  elements.historyModal.classList.remove('show');
+  elements.historyModal.style.opacity = '';
+  elements.historyModal.style.pointerEvents = '';
 }
 
 function buildBlankChoices() {
@@ -494,7 +505,10 @@ function getCurrentPlayerObj() {
 function renderRack() {
   const player = getCurrentPlayerObj();
   elements.rack.innerHTML = '';
-  if (!player || !player.rack) return;
+  if (!player || !player.rack) {
+    renderRackSummary([]);
+    return;
+  }
 
   const placedIds = new Set(localState.placements.keys());
   const rackTiles = player.rack.filter(t => !placedIds.has(t.id));
@@ -508,6 +522,43 @@ function renderRack() {
     fragment.appendChild(btn);
   });
   elements.rack.appendChild(fragment);
+  renderRackSummary(rackTiles);
+}
+
+function renderRackSummary(rackTiles) {
+  const tiles = rackTiles || [];
+  const total = tiles.reduce((sum, tile) => sum + (Number(tile.value) || 0), 0);
+
+  if (elements.rackTileBreakdown) {
+    elements.rackTileBreakdown.innerHTML = '';
+    if (!tiles.length) {
+      const empty = document.createElement('p');
+      empty.className = 'rack-summary-empty';
+      empty.textContent = 'Keine Steine auf der Hand.';
+      elements.rackTileBreakdown.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      tiles.forEach(tile => {
+        const chip = document.createElement('div');
+        chip.className = 'rack-summary-item';
+        chip.innerHTML = `<strong>${tile.assignedLetter || tile.letter}</strong><span>${tile.value} Punkte</span>`;
+        fragment.appendChild(chip);
+      });
+      elements.rackTileBreakdown.appendChild(fragment);
+    }
+  }
+  updateRackTotals(total);
+}
+
+function updateRackTotals(total) {
+  if (!elements.rackTotalBadges || !elements.rackTotalBadges.length) return;
+  elements.rackTotalBadges.forEach(el => { el.textContent = total.toString(); });
+}
+
+function updateBagCounters(count) {
+  const value = (count || 0).toString();
+  if (elements.bagCount) elements.bagCount.textContent = value;
+  if (elements.bagCountInline) elements.bagCountInline.textContent = value;
 }
 
 function renderPlayers() {
@@ -539,7 +590,7 @@ function renderPlayers() {
   elements.playerList.appendChild(fragment);
   const cur = gameState.players[gameState.currentPlayerIndex];
   elements.currentPlayerLabel.textContent = cur ? cur.name : '—';
-  elements.bagCount.textContent = (gameState.bag || []).length.toString();
+  updateBagCounters((gameState.bag || []).length);
 }
 
 function renderHistory() {

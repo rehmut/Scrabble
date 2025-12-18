@@ -11,26 +11,46 @@
 <body>
   <div class="app-shell">
     <aside class="panel panel--scores">
-      <div class="panel-header">
-        <div>
-          <p class="label">Spielübersicht</p>
-          <h2>Spieler & Punkte</h2>
+      <section class="panel-card panel-card--players">
+        <div class="panel-header">
+          <div>
+            <p class="label">Spiel??bersicht</p>
+            <h2>Spieler & Punkte</h2>
+          </div>
+          <div class="dictionary-chip" id="dictionaryChip">W??rterbuch l??dt ???</div>
         </div>
-        <div class="dictionary-chip" id="dictionaryChip">Wörterbuch lädt …</div>
-      </div>
-      <ul class="player-list" id="playerList"></ul>
-      <div class="bag-info">
-        <div>
+        <ul class="player-list" id="playerList"></ul>
+      </section>
+
+      <section class="panel-card panel-card--stats">
+        <div class="stat-block">
           <p class="label">Steine im Beutel</p>
-          <strong id="bagCount">102</strong>
+          <div class="stat-value">
+            <strong id="bagCount">102</strong>
+            <span>verbleibend</span>
+          </div>
         </div>
-        <div>
-          <p class="label">Zughistorie</p>
+        <div class="stat-block">
+          <p class="label">Rack-Punkte</p>
+          <div class="stat-value stat-value--highlight">
+            <strong data-rack-total>0</strong>
+            <span>auf der Hand</span>
+          </div>
         </div>
-      </div>
-      <div class="history" id="historyPanel">
-        <ul id="historyList"></ul>
-      </div>
+      </section>
+
+      <section class="panel-card panel-card--history">
+        <div class="panel-card-header">
+          <div>
+            <p class="label">Zughistorie</p>
+            <h3>Letzte Aktionen</h3>
+          </div>
+          <button class="ghost-btn" data-open-history>Verlauf anzeigen</button>
+        </div>
+        <div class="history" id="historyPanel">
+          <ul id="historyList"></ul>
+        </div>
+      </section>
     </aside>
 
     <main class="main-area">
@@ -41,7 +61,7 @@
             <p>Deutsch · Mehrspieler</p>
           </div>
           <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
-          <button id="mobileHistoryBtn" class="mobile-history-btn">Verlauf</button>
+          <button id="mobileHistoryBtn" class="mobile-history-btn" data-open-history>Verlauf</button>
         </div>
         <div id="board" class="board-grid" role="grid" aria-label="Scrabble-Spielbrett"></div>
       </div>
@@ -66,6 +86,27 @@
           <button id="leaveBtn" class="danger"
             style="background: rgba(255, 95, 126, 0.2); color: var(--danger);">Verlassen</button>
         </div>
+        <div class="rack-footer">
+          <div class="bag-chip">
+            <p class="label">Im Beutel</p>
+            <strong id="bagCountInline">102</strong>
+            <span>Steine ??brig</span>
+          </div>
+          <button class="ghost-btn ghost-btn--light" data-open-history>Verlauf</button>
+        </div>
+        <section class="rack-summary" aria-live="polite">
+          <div class="rack-summary-header">
+            <div>
+              <p class="label">Deine Steine</p>
+              <h3>Rack-Wert</h3>
+            </div>
+            <div class="rack-summary-total">
+              <span class="label">Summe</span>
+              <strong data-rack-total>0</strong>
+            </div>
+          </div>
+          <div class="rack-summary-list" id="rackTileBreakdown"></div>
+        </section>
       </section>
     </main>
   </div>

@@ -27,6 +27,283 @@ body {
   color: var(--text);
 }
 
+.landing-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: clamp(2rem, 5vw, 4rem);
+  background: linear-gradient(135deg, rgba(8, 9, 20, 0.9), rgba(9, 13, 34, 0.7));
+}
+
+.landing-screen.hidden {
+  display: none;
+}
+
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(2rem, 4vw, 4rem);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.landing-hero h1 {
+  margin-top: 0;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.landing-copy {
+  color: var(--text-muted);
+  max-width: 46ch;
+  line-height: 1.5;
+}
+
+.landing-form {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.landing-form input,
+.landing-form select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.landing-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.landing-row select {
+  flex: 1 1 150px;
+}
+
+.landing-row button {
+  flex: 1;
+}
+
+.landing-status {
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.landing-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.board-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.board-card-preview {
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.board-card-preview--sunset {
+  background: linear-gradient(135deg, #f093fb44, #f5576c44);
+}
+
+.board-card-preview--mint {
+  background: linear-gradient(135deg, #5de0e644, #4fd1c544);
+}
+
+.board-card-preview--midnight {
+  background: linear-gradient(135deg, #1f1c2c44, #928dab44);
+}
+
+.mini-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.mini-board span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  font-weight: 700;
+}
+
+.board-card-meta h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.board-card-meta p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.game-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-shell.is-hidden {
+  display: none;
+}
+
+.game-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px clamp(16px, 5vw, 48px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toolbar-brand h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.toolbar-brand p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.toolbar-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.toolbar-btn:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playground {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: clamp(12px, 4vw, 32px);
+}
+
+.board-stage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.rack-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rack-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(420px, 90vw);
+  height: 100vh;
+  background: rgba(7, 9, 19, 0.95);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 50;
+}
+
+.info-drawer.is-active {
+  transform: translateX(0);
+}
+
+.drawer-inner {
+  padding: 32px 28px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawer-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 40;
+}
+
+.drawer-scrim.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -282,11 +559,11 @@ body {
 }
 
 .board-grid {
-  margin-top: 24px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(15, minmax(34px, 1fr));
-  gap: 6px;
-  width: min(90vw, 820px);
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: clamp(2px, 0.6vw, 6px);
+  width: min(min(100vw - 24px, 92vmin), 900px);
 }
 
 .board-cell {
@@ -501,31 +778,29 @@ body {
   color: var(--tile-text);
   border: none;
   border-radius: 12px;
-  padding: 12px 10px 8px;
   min-width: 52px;
   min-height: 52px;
-  /* Changed from 60px to 52px */
   aspect-ratio: 1 / 1;
-  /* Make tiles quadratic */
-  font-size: 1.4rem;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
   font-weight: 700;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Move content to bottom */
-  padding-bottom: 4px;
-  /* Add some padding at the bottom */
-  gap: 0;
-  /* Remove gap to tighter pack */
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border 0.12s ease;
+  position: relative;
+  padding: 0;
 }
 
 .tile-btn span {
-  font-size: 0.7rem;
-  font-weight: 600;
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--tile-text);
+  opacity: 0.85;
 }
 
 .tile-btn:hover {
@@ -709,68 +984,19 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 1100px) {
-  .app-shell {
+  .landing-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    min-height: 100vh;
   }
 
-  .panel {
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 16px;
-    flex-direction: row;
-    align-items: stretch;
+  .game-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .toolbar-actions {
+    width: 100%;
     justify-content: flex-start;
-    overflow-x: auto;
-    gap: 16px;
-    background: radial-gradient(circle at top, #0c0d16 0%, #05060a 70%);
-  }
-
-  .panel-card {
-    min-width: 260px;
-    flex: 0 0 auto;
-  }
-
-  .panel-card + .panel-card {
-    margin-top: 0;
-  }
-
-  .main-area {
-    flex-direction: column;
-    padding: 20px;
-    gap: 16px;
-    width: 100%;
-  }
-
-  .board-wrapper {
-    width: 100%;
-    padding: 20px;
-    border-radius: 24px;
-    position: relative;
-  }
-
-  .board-header {
-    position: static;
-    background: transparent;
-    justify-content: space-between;
-  }
-
-  .board-header>div:first-child {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .rack-wrapper {
-    width: 100%;
-    max-width: 100%;
-    flex: 1;
-  }
-
-  .rack-footer {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 
@@ -992,35 +1218,20 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 480px) {
-  .board-wrapper {
-    padding: 8px;
-    border-radius: 12px;
+  .toolbar-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  /* Removed shrinking logic, relying on overflow-x: auto from above */
+  .playground {
+    padding: 12px;
+  }
+
+  .rack-actions button {
+    flex: 1 1 calc(50% - 8px);
+  }
 }
 
 .hidden {
   display: none !important;
-}
-
-/* Revert tile styles and optimize mobile layout (Overrides) */
-.tile-btn {
-  justify-content: center !important;
-  padding-bottom: 8px !important;
-  gap: 4px !important;
-}
-
-@media (max-width: 1100px) {
-  .main-area {
-    padding-bottom: 2px !important;
-  }
-
-  .board-wrapper {
-    padding-bottom: 4px !important;
-  }
-
-  #rack {
-    padding-bottom: 4px !important;
-  }
 }

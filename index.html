@@ -9,68 +9,102 @@
 </head>
 
 <body>
-  <div class="app-shell">
-    <aside class="panel panel--scores">
-      <section class="panel-card panel-card--players">
-        <div class="panel-header">
-          <div>
-            <p class="label">Spiel??bersicht</p>
-            <h2>Spieler & Punkte</h2>
+  <section class="landing-screen is-visible" id="landingScreen">
+    <div class="landing-grid">
+      <div class="landing-hero">
+        <p class="eyebrow">Scrabble Online</p>
+        <h1>Hier starten fertige Bretter neue Partien</h1>
+        <p class="landing-copy">
+          Wir speichern vollständige Spiele, damit du inspirieren kannst. Wähle einen Raum, lade Freundinnen ein
+          und spiele direkt im Browser – ohne Pop-ups.
+        </p>
+        <div class="landing-form">
+          <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
+          <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
+          <div class="landing-row">
+            <select id="lobbyMaxPlayers">
+              <option value="2">2 Spieler</option>
+              <option value="3">3 Spieler</option>
+              <option value="4">4 Spieler</option>
+            </select>
+            <button id="joinGameBtn" class="primary">Spiel beitreten / starten</button>
           </div>
-          <div class="dictionary-chip" id="dictionaryChip">W??rterbuch l??dt ???</div>
+          <p id="lobbyStatus" class="landing-status"></p>
         </div>
-        <ul class="player-list" id="playerList"></ul>
-      </section>
-
-      <section class="panel-card panel-card--stats">
-        <div class="stat-block">
-          <p class="label">Steine im Beutel</p>
-          <div class="stat-value">
-            <strong id="bagCount">102</strong>
-            <span>verbleibend</span>
-          </div>
-        </div>
-        <div class="stat-block">
-          <p class="label">Rack-Punkte</p>
-          <div class="stat-value stat-value--highlight">
-            <strong data-rack-total>0</strong>
-            <span>auf der Hand</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel-card panel-card--history">
-        <div class="panel-card-header">
-          <div>
-            <p class="label">Zughistorie</p>
-            <h3>Letzte Aktionen</h3>
-          </div>
-          <button class="ghost-btn" data-open-history>Verlauf anzeigen</button>
-        </div>
-        <div class="history" id="historyPanel">
-          <ul id="historyList"></ul>
-        </div>
-      </section>
-    </aside>
-
-    <main class="main-area">
-      <div class="board-wrapper">
-        <div class="board-header">
-          <div>
-            <h1>Scrabble</h1>
-            <p>Deutsch · Mehrspieler</p>
-          </div>
-          <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
-          <button id="mobileHistoryBtn" class="mobile-history-btn" data-open-history>Verlauf</button>
-        </div>
-        <div id="board" class="board-grid" role="grid" aria-label="Scrabble-Spielbrett"></div>
       </div>
+      <div class="landing-gallery">
+        <article class="board-card">
+          <div class="board-card-preview board-card-preview--sunset">
+            <div class="mini-board">
+              <span>Q</span><span>U</span><span>E</span><span>R</span><span>K</span>
+              <span></span><span></span><span>A</span><span></span><span>O</span>
+              <span>S</span><span>P</span><span>I</span><span>E</span><span>L</span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span>W</span><span>O</span><span>R</span><span>T</span><span></span>
+            </div>
+          </div>
+          <div class="board-card-meta">
+            <h4>Finalrunde – 142 Punkte</h4>
+            <p>Anna besiegte Max mit einem Bingo auf Wort 12.</p>
+          </div>
+        </article>
+        <article class="board-card">
+          <div class="board-card-preview board-card-preview--mint">
+            <div class="mini-board">
+              <span>T</span><span>U</span><span>N</span><span>A</span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span>S</span><span>E</span><span>A</span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span>M</span><span>E</span><span>E</span><span>T</span><span>S</span>
+            </div>
+          </div>
+          <div class="board-card-meta">
+            <h4>Teamspiel – 118 Punkte</h4>
+            <p>Berlin vs. Hamburg, spannendes Kopf-an-Kopf-Rennen.</p>
+          </div>
+        </article>
+        <article class="board-card">
+          <div class="board-card-preview board-card-preview--midnight">
+            <div class="mini-board">
+              <span>B</span><span>L</span><span>O</span><span>C</span><span>K</span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span>P</span><span>U</span><span>N</span><span>K</span><span>T</span>
+            </div>
+          </div>
+          <div class="board-card-meta">
+            <h4>Best of the Week</h4>
+            <p>Jede Woche neue Community-Highlights.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
 
-      <section class="rack-wrapper">
-        <div class="rack-header">
+  <div class="game-shell is-hidden" id="gameShell">
+    <header class="game-toolbar">
+      <div class="toolbar-brand">
+        <h1>Scrabble</h1>
+        <p>Deutsch · Echtzeit</p>
+      </div>
+      <div class="toolbar-actions">
+        <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
+        <button class="toolbar-btn" id="drawerToggleBtn">Info</button>
+        <button class="toolbar-btn" data-open-history>Verlauf</button>
+      </div>
+    </header>
+
+    <main class="playground" role="main">
+      <section class="board-stage">
+        <div id="board" class="board-grid" role="grid" aria-label="Scrabble-Spielbrett"></div>
+      </section>
+
+      <section class="rack-stage">
+        <div class="rack-info">
           <div>
             <p class="label">Aktiver Spieler</p>
-            <h2 id="currentPlayerLabel">–</h2>
+            <h2 id="currentPlayerLabel">&mdash;</h2>
           </div>
           <div class="turn-info">
             <span id="turnCounter">Zug 1</span>
@@ -86,74 +120,39 @@
           <button id="leaveBtn" class="danger"
             style="background: rgba(255, 95, 126, 0.2); color: var(--danger);">Verlassen</button>
         </div>
-        <div class="rack-footer">
-          <div class="bag-chip">
-            <p class="label">Im Beutel</p>
-            <strong id="bagCountInline">102</strong>
-            <span>Steine ??brig</span>
-          </div>
-          <button class="ghost-btn ghost-btn--light" data-open-history>Verlauf</button>
-        </div>
-        <section class="rack-summary" aria-live="polite">
-          <div class="rack-summary-header">
-            <div>
-              <p class="label">Deine Steine</p>
-              <h3>Rack-Wert</h3>
-            </div>
-            <div class="rack-summary-total">
-              <span class="label">Summe</span>
-              <strong data-rack-total>0</strong>
-            </div>
-          </div>
-          <div class="rack-summary-list" id="rackTileBreakdown"></div>
-        </section>
       </section>
     </main>
   </div>
 
-  <div id="lobbyOverlay" class="overlay is-visible">
-    <div class="overlay-card">
-      <h2>Scrabble Online</h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
-        Gib deinen Namen ein und starte oder trete einem Spiel bei.
-      </p>
-      <div class="player-inputs">
-        <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
-        <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
-        <select id="lobbyMaxPlayers"
-          style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.25); color: var(--text); font-size: 1rem;">
-          <option value="2">2 Spieler</option>
-          <option value="3">3 Spieler</option>
-          <option value="4">4 Spieler</option>
-        </select>
-      </div>
-      <div class="form-actions" style="margin-top: 20px;">
-        <button id="joinGameBtn" class="primary" style="width: 100%;">Spiel beitreten / starten</button>
-      </div>
-      <p id="lobbyStatus" style="margin-top: 10px; font-size: 0.8rem; color: var(--danger); min-height: 1.2em;"></p>
-    </div>
-  </div>
-
-  <div id="startOverlay" class="overlay hidden">
-    <!-- Existing start overlay content will be hidden/unused in multiplayer mode initially -->
-    <div class="overlay-card">
-      <h2>Neues Spiel</h2>
-      <p class="dictionary-hint">Wörterbuch wird geladen …</p>
-      <form id="playerForm">
-        <div class="player-inputs" id="playerInputList">
-          <input type="text" placeholder="Spieler 1" value="Spieler 1" />
-          <input type="text" placeholder="Spieler 2" value="Spieler 2" />
+  <aside class="info-drawer" id="infoDrawer" aria-hidden="true">
+    <div class="drawer-inner">
+      <div class="drawer-header">
+        <div>
+          <p class="label">Spielinfo</p>
+          <h3>Raumübersicht</h3>
         </div>
-        <button type="button" id="addPlayerField" class="icon-btn"
-          style="margin-bottom: 20px; width: 100%; border-radius: 10px; font-size: 1rem;">+ Weiteren Spieler
-          hinzufügen</button>
-        <div class="form-actions">
-          <button type="submit" class="primary" style="flex: 1;">Spiel starten</button>
+        <button class="icon-btn" id="closeDrawerBtn" aria-label="Info schließen">&times;</button>
+      </div>
+      <div class="dictionary-chip" id="dictionaryChip">Wörterbuch lädt …</div>
+      <section class="drawer-card">
+        <p class="label">Spieler & Punkte</p>
+        <ul class="player-list" id="playerList"></ul>
+      </section>
+      <section class="drawer-card">
+        <p class="label">Steine im Beutel</p>
+        <strong id="bagCount">102</strong>
+      </section>
+      <section class="drawer-card">
+        <div class="drawer-card-header">
+          <p class="label">Zughistorie</p>
         </div>
-      </form>
+        <div class="history" id="historyPanel">
+          <ul id="historyList"></ul>
+        </div>
+      </section>
     </div>
-  </div>
-
+  </aside>
+  <div class="drawer-scrim" id="drawerScrim"></div>
   <div id="blankModal" class="modal">
     <div class="modal-card">
       <div class="modal-header">

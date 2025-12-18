@@ -161,7 +161,6 @@ const elements = {
   passBtn: document.getElementById('passBtn'),
   bagCount: document.getElementById('bagCount'),
   historyList: document.getElementById('historyList'),
-  lobbyOverlay: document.getElementById('lobbyOverlay'),
   joinGameBtn: document.getElementById('joinGameBtn'),
   lobbyPlayerName: document.getElementById('lobbyPlayerName'),
   lobbyGameId: document.getElementById('lobbyGameId'),
@@ -173,14 +172,16 @@ const elements = {
   confirmExchangeBtn: document.getElementById('confirmExchangeBtn'),
   cancelExchangeBtn: document.getElementById('cancelExchangeBtn'),
   dictionaryChip: document.getElementById('dictionaryChip'),
-  mobileHistoryBtn: document.getElementById('mobileHistoryBtn'),
   historyModal: document.getElementById('historyModal'),
   mobileHistoryList: document.getElementById('mobileHistoryList'),
   lobbyMaxPlayers: document.getElementById('lobbyMaxPlayers'),
   leaveBtn: document.getElementById('leaveBtn'),
-  bagCountInline: document.getElementById('bagCountInline'),
-  rackTileBreakdown: document.getElementById('rackTileBreakdown'),
-  rackTotalBadges: Array.from(document.querySelectorAll('[data-rack-total]')),
+  landingScreen: document.getElementById('landingScreen'),
+  gameShell: document.getElementById('gameShell'),
+  drawer: document.getElementById('infoDrawer'),
+  drawerToggleBtn: document.getElementById('drawerToggleBtn'),
+  closeDrawerBtn: document.getElementById('closeDrawerBtn'),
+  drawerScrim: document.getElementById('drawerScrim'),
   historyOpeners: Array.from(document.querySelectorAll('[data-open-history]'))
 };
 
@@ -206,6 +207,10 @@ function bindEvents() {
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
 
+  if (elements.drawerToggleBtn) elements.drawerToggleBtn.addEventListener('click', openDrawer);
+  if (elements.closeDrawerBtn) elements.closeDrawerBtn.addEventListener('click', closeDrawer);
+  if (elements.drawerScrim) elements.drawerScrim.addEventListener('click', closeDrawer);
+
   if (elements.historyModal && elements.historyOpeners.length) {
     elements.historyOpeners.forEach(btn => btn.addEventListener('click', openHistoryModal));
   }
@@ -227,6 +232,20 @@ function closeHistoryModal() {
   elements.historyModal.classList.remove('show');
   elements.historyModal.style.opacity = '';
   elements.historyModal.style.pointerEvents = '';
+}
+
+function openDrawer() {
+  if (!elements.drawer) return;
+  elements.drawer.classList.add('is-active');
+  elements.drawer.setAttribute('aria-hidden', 'false');
+  if (elements.drawerScrim) elements.drawerScrim.classList.add('is-active');
+}
+
+function closeDrawer() {
+  if (!elements.drawer) return;
+  elements.drawer.classList.remove('is-active');
+  elements.drawer.setAttribute('aria-hidden', 'true');
+  if (elements.drawerScrim) elements.drawerScrim.classList.remove('is-active');
 }
 
 function buildBlankChoices() {
@@ -339,7 +358,9 @@ function createNewGame(playerName, maxPlayers = 4) {
 }
 
 function startGameListener() {
-  elements.lobbyOverlay.classList.remove('is-visible');
+  if (elements.landingScreen) elements.landingScreen.classList.add('hidden');
+  if (elements.gameShell) elements.gameShell.classList.remove('is-hidden');
+  closeDrawer();
   gameRef.on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -505,10 +526,7 @@ function getCurrentPlayerObj() {
 function renderRack() {
   const player = getCurrentPlayerObj();
   elements.rack.innerHTML = '';
-  if (!player || !player.rack) {
-    renderRackSummary([]);
-    return;
-  }
+  if (!player || !player.rack) return;
 
   const placedIds = new Set(localState.placements.keys());
   const rackTiles = player.rack.filter(t => !placedIds.has(t.id));
@@ -522,43 +540,11 @@ function renderRack() {
     fragment.appendChild(btn);
   });
   elements.rack.appendChild(fragment);
-  renderRackSummary(rackTiles);
-}
-
-function renderRackSummary(rackTiles) {
-  const tiles = rackTiles || [];
-  const total = tiles.reduce((sum, tile) => sum + (Number(tile.value) || 0), 0);
-
-  if (elements.rackTileBreakdown) {
-    elements.rackTileBreakdown.innerHTML = '';
-    if (!tiles.length) {
-      const empty = document.createElement('p');
-      empty.className = 'rack-summary-empty';
-      empty.textContent = 'Keine Steine auf der Hand.';
-      elements.rackTileBreakdown.appendChild(empty);
-    } else {
-      const fragment = document.createDocumentFragment();
-      tiles.forEach(tile => {
-        const chip = document.createElement('div');
-        chip.className = 'rack-summary-item';
-        chip.innerHTML = `<strong>${tile.assignedLetter || tile.letter}</strong><span>${tile.value} Punkte</span>`;
-        fragment.appendChild(chip);
-      });
-      elements.rackTileBreakdown.appendChild(fragment);
-    }
-  }
-  updateRackTotals(total);
-}
-
-function updateRackTotals(total) {
-  if (!elements.rackTotalBadges || !elements.rackTotalBadges.length) return;
-  elements.rackTotalBadges.forEach(el => { el.textContent = total.toString(); });
 }
 
 function updateBagCounters(count) {
   const value = (count || 0).toString();
   if (elements.bagCount) elements.bagCount.textContent = value;
-  if (elements.bagCountInline) elements.bagCountInline.textContent = value;
 }
 
 function renderPlayers() {

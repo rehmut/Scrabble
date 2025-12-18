@@ -182,6 +182,8 @@ const elements = {
   drawerToggleBtn: document.getElementById('drawerToggleBtn'),
   closeDrawerBtn: document.getElementById('closeDrawerBtn'),
   drawerScrim: document.getElementById('drawerScrim'),
+  scoreStrip: document.getElementById('scoreStrip'),
+  bingoIndicator: document.getElementById('bingoIndicator'),
   historyOpeners: Array.from(document.querySelectorAll('[data-open-history]'))
 };
 
@@ -206,6 +208,7 @@ function bindEvents() {
   elements.exchangeModal.querySelector('[data-close-exchange]').addEventListener('click', closeExchangeModal);
   elements.cancelExchangeBtn.addEventListener('click', closeExchangeModal);
   elements.confirmExchangeBtn.addEventListener('click', handleConfirmExchange);
+  if (elements.leaveBtn) elements.leaveBtn.addEventListener('click', handleLeaveGame);
 
   if (elements.drawerToggleBtn) elements.drawerToggleBtn.addEventListener('click', openDrawer);
   if (elements.closeDrawerBtn) elements.closeDrawerBtn.addEventListener('click', closeDrawer);
@@ -540,6 +543,14 @@ function renderRack() {
     fragment.appendChild(btn);
   });
   elements.rack.appendChild(fragment);
+  updateBingoIndicator();
+}
+
+function updateBingoIndicator() {
+  if (!elements.bingoIndicator) return;
+  const hasBingo = localState.placements.size === RACK_SIZE;
+  elements.bingoIndicator.classList.toggle('is-active', hasBingo);
+  elements.bingoIndicator.setAttribute('aria-hidden', hasBingo ? 'false' : 'true');
 }
 
 function updateBagCounters(count) {
@@ -574,6 +585,19 @@ function renderPlayers() {
     fragment.appendChild(li);
   });
   elements.playerList.appendChild(fragment);
+  if (elements.scoreStrip) {
+    elements.scoreStrip.innerHTML = '';
+    const stripFragment = document.createDocumentFragment();
+    (gameState.players || []).forEach((player, index) => {
+      const pill = document.createElement('div');
+      pill.className = 'score-pill';
+      if (index === gameState.currentPlayerIndex && !gameState.gameOver) pill.classList.add('is-turn');
+      if (player.id === localState.myPlayerId) pill.classList.add('is-mine');
+      pill.innerHTML = `<span class="score-pill-name">${player.name}</span><span class="score-pill-value">${player.score}</span>`;
+      stripFragment.appendChild(pill);
+    });
+    elements.scoreStrip.appendChild(stripFragment);
+  }
   const cur = gameState.players[gameState.currentPlayerIndex];
   elements.currentPlayerLabel.textContent = cur ? cur.name : '—';
   updateBagCounters((gameState.bag || []).length);

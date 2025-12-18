@@ -180,8 +180,9 @@ body {
 .game-toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
+  flex-wrap: wrap;
   padding: 20px clamp(16px, 5vw, 48px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -202,6 +203,43 @@ body {
   gap: 12px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.score-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.score-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.score-pill-name {
+  font-weight: 600;
+}
+
+.score-pill-value {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+.score-pill.is-turn {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(93, 224, 230, 0.35);
+}
+
+.score-pill.is-mine {
+  background: rgba(93, 224, 230, 0.15);
 }
 
 .toolbar-btn {
@@ -245,6 +283,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.bingo-indicator {
+  margin-top: -4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(93, 224, 230, 0.12);
+  color: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.bingo-indicator.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  animation: bingoBlink 1.2s infinite;
+}
+
+@keyframes bingoBlink {
+  0% {
+    box-shadow: 0 0 0 0 rgba(93, 224, 230, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(93, 224, 230, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(93, 224, 230, 0);
+  }
 }
 
 .info-drawer {

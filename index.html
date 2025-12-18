@@ -93,6 +93,7 @@
         <button class="toolbar-btn" id="drawerToggleBtn">Info</button>
         <button class="toolbar-btn" data-open-history>Verlauf</button>
       </div>
+      <div class="score-strip" id="scoreStrip" aria-live="polite"></div>
     </header>
 
     <main class="playground" role="main">
@@ -119,6 +120,9 @@
           <button id="passBtn" disabled>Passen</button>
           <button id="leaveBtn" class="danger"
             style="background: rgba(255, 95, 126, 0.2); color: var(--danger);">Verlassen</button>
+        </div>
+        <div id="bingoIndicator" class="bingo-indicator" aria-live="polite" aria-hidden="true">
+          Bingo möglich! +50 Punkte
         </div>
       </section>
     </main>

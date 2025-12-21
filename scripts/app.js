@@ -129,7 +129,8 @@ const localState = {
   pendingBlank: null,
   myPlayerId: localStorage.getItem('scrabble_player_id') || `P_${Math.random().toString(36).substr(2, 9)}`,
   gameId: null,
-  isMyTurn: false
+  isMyTurn: false,
+  gameOverShown: false
 };
 localStorage.setItem('scrabble_player_id', localState.myPlayerId);
 
@@ -143,7 +144,8 @@ let gameState = {
   turn: 1,
   nextTileId: 1,
   gameOver: false,
-  winner: null
+  winner: null,
+  moves: []
 };
 
 // --- DOM ELEMENTS ---
@@ -184,6 +186,9 @@ const elements = {
   drawerScrim: document.getElementById('drawerScrim'),
   scoreStrip: document.getElementById('scoreStrip'),
   bingoIndicator: document.getElementById('bingoIndicator'),
+  gameOverModal: document.getElementById('gameOverModal'),
+  gameOverWinner: document.getElementById('gameOverWinner'),
+  gameOverSummary: document.getElementById('gameOverSummary'),
   historyOpeners: Array.from(document.querySelectorAll('[data-open-history]'))
 };
 
@@ -221,6 +226,11 @@ function bindEvents() {
     const closeBtn = elements.historyModal.querySelector('[data-close-history]');
     if (closeBtn) closeBtn.addEventListener('click', closeHistoryModal);
   }
+
+  if (elements.gameOverModal) {
+    const closeBtn = elements.gameOverModal.querySelector('[data-close-gameover]');
+    if (closeBtn) closeBtn.addEventListener('click', closeGameOverModal);
+  }
 }
 
 function openHistoryModal() {
@@ -235,6 +245,22 @@ function closeHistoryModal() {
   elements.historyModal.classList.remove('show');
   elements.historyModal.style.opacity = '';
   elements.historyModal.style.pointerEvents = '';
+}
+
+function openGameOverModal() {
+  if (!elements.gameOverModal) return;
+  elements.gameOverModal.classList.add('show');
+  elements.gameOverModal.style.display = 'flex';
+  elements.gameOverModal.style.opacity = '1';
+  elements.gameOverModal.style.pointerEvents = 'all';
+}
+
+function closeGameOverModal() {
+  if (!elements.gameOverModal) return;
+  elements.gameOverModal.classList.remove('show');
+  elements.gameOverModal.style.display = '';
+  elements.gameOverModal.style.opacity = '';
+  elements.gameOverModal.style.pointerEvents = '';
 }
 
 function openDrawer() {
@@ -354,6 +380,7 @@ function createNewGame(playerName, maxPlayers = 4) {
     turn: 1,
     nextTileId: idRef.value,
     gameOver: false,
+    moves: [],
     lastActive: Date.now()
   };
 
@@ -372,6 +399,7 @@ function startGameListener() {
       if (!gameState.players) gameState.players = [];
       if (!gameState.bag) gameState.bag = [];
       if (!gameState.history) gameState.history = [];
+      if (!gameState.moves) gameState.moves = [];
 
       syncLocalState();
       renderEverything();
@@ -455,15 +483,23 @@ function renderEverything() {
   renderHistory();
   updateControls();
   updateTurnInfo();
+  maybeEndByTiles();
 
   if (gameState.gameOver) {
     const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
     setStatus(`Spiel vorbei! Sieger: ${winnerName}`, 'success');
+    renderGameSummary();
+    if (!localState.gameOverShown) {
+      openGameOverModal();
+      localState.gameOverShown = true;
+    }
   } else if (localState.isMyTurn) {
     setStatus('Du bist am Zug!', 'info');
+    localState.gameOverShown = false;
   } else {
     const cur = gameState.players[gameState.currentPlayerIndex];
     setStatus(`Warte auf ${cur ? cur.name : '...'}`, 'info');
+    localState.gameOverShown = false;
   }
 }
 
@@ -626,6 +662,93 @@ function renderHistory() {
   }
 }
 
+function maybeEndByTiles() {
+  if (gameState.gameOver) return;
+  const bagEmpty = (gameState.bag || []).length === 0;
+  if (!bagEmpty) return;
+  const outIdx = (gameState.players || []).findIndex(p => (p.rack || []).length === 0);
+  if (outIdx !== -1) finishGameRemote('out', outIdx);
+}
+
+function renderGameSummary() {
+  if (!elements.gameOverSummary || !elements.gameOverWinner) return;
+  const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
+  elements.gameOverWinner.textContent = `Sieger: ${winnerName}`;
+
+  elements.gameOverSummary.innerHTML = '';
+  const moves = (gameState.moves || []).filter(m => m.type === 'play');
+  if (moves.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'game-over-empty';
+    empty.textContent = 'Keine Zugdaten vorhanden.';
+    elements.gameOverSummary.appendChild(empty);
+    return;
+  }
+
+  const movesByPlayer = new Map();
+  moves.forEach(move => {
+    if (!movesByPlayer.has(move.playerId)) movesByPlayer.set(move.playerId, []);
+    movesByPlayer.get(move.playerId).push(move);
+  });
+
+  const playerOrder = (gameState.players || []).map(player => ({ id: player.id, name: player.name }));
+  movesByPlayer.forEach((list, playerId) => {
+    if (!playerOrder.some(player => player.id === playerId)) {
+      playerOrder.push({ id: playerId, name: (list[0] && list[0].playerName) ? list[0].playerName : 'Spieler' });
+    }
+  });
+
+  playerOrder.forEach(player => {
+    const playerMoves = movesByPlayer.get(player.id) || [];
+    const section = document.createElement('section');
+    section.className = 'game-over-player';
+
+    const title = document.createElement('h4');
+    title.textContent = player.name;
+    section.appendChild(title);
+
+    if (playerMoves.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'game-over-empty';
+      empty.textContent = 'Keine Zuege gespielt.';
+      section.appendChild(empty);
+      elements.gameOverSummary.appendChild(section);
+      return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'game-over-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Woerter</th>
+          <th class="points">Punkte</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+    playerMoves.forEach(move => {
+      const row = document.createElement('tr');
+      const wordsCell = document.createElement('td');
+      const pointsCell = document.createElement('td');
+      pointsCell.className = 'points';
+      wordsCell.textContent = formatMoveWords(move.words);
+      pointsCell.textContent = move.moveScore;
+      row.append(wordsCell, pointsCell);
+      tbody.appendChild(row);
+    });
+    section.appendChild(table);
+    elements.gameOverSummary.appendChild(section);
+  });
+}
+
+function formatMoveWords(words) {
+  if (!Array.isArray(words) || words.length === 0) return '-';
+  return words.map(w => `${w.word} (+${w.score})`).join(', ');
+}
+
 function updateTurnInfo() {
   elements.turnCounter.textContent = gameState.gameOver ? 'Ende' : `Zug ${gameState.turn}`;
 }
@@ -778,7 +901,8 @@ function handlePass() {
   updates['history'] = hist;
   updates['lastActive'] = Date.now();
   gameRef.update(updates);
-  if (updates.passes >= gameState.players.length * 2) finishGameRemote('passes');
+  const passLimit = (gameState.players || []).length * 3;
+  if (passLimit > 0 && updates.passes >= passLimit) finishGameRemote('passes');
 }
 
 // --- EXCHANGE ---
@@ -926,6 +1050,16 @@ function handleSubmitMove() {
   const hist = [...(gameState.history || [])];
   hist.unshift({ message: `${player.name} legt ${words} · ${val.score} Punkte` });
   updates['history'] = hist;
+  const moveLog = [...(gameState.moves || [])];
+  moveLog.push({
+    type: 'play',
+    playerId: player.id,
+    playerName: player.name,
+    words: val.words.map(w => ({ word: w.word, score: w.score })),
+    moveScore: val.score,
+    turn: gameState.turn
+  });
+  updates['moves'] = moveLog;
   updates['passes'] = 0;
   updates['currentPlayerIndex'] = (gameState.currentPlayerIndex + 1) % gameState.players.length;
   updates['turn'] = gameState.turn + 1;

@@ -1023,6 +1023,65 @@ button:not(:disabled):hover {
   /* Allow scrolling inside the modal */
 }
 
+.modal-card--wide {
+  width: min(760px, 94vw);
+}
+
+.game-over-winner {
+  margin: 8px 0 16px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.game-over-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.game-over-player {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.game-over-player h4 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.game-over-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.game-over-table th,
+.game-over-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  word-break: break-word;
+}
+
+.game-over-table th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.game-over-table .points {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-over-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
 /* ... */
 
 .blank-grid button {

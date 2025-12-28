@@ -14,6 +14,7 @@ const firebaseConfig = {
 const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
 const BINGO_BONUS = 50;
+const EXPIRATION_MS = 20 * 60 * 60 * 1000; // 20 hours
 const REMOTE_DICTIONARY_SOURCES = [
   'https://raw.githubusercontent.com/kamilmielnik/scrabble-dictionaries/master/german/german.txt', // Better source
   'https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/de/de_50k.txt',
@@ -333,8 +334,7 @@ function handleJoinGame() {
 }
 
 function joinExistingGame(data, playerName, passwordInput) {
-  // Check for expiration (20 hours)
-  const EXPIRATION_MS = 20 * 60 * 60 * 1000;
+  // Check for expiration
   if (data.lastActive && (Date.now() - data.lastActive > EXPIRATION_MS)) {
     if (confirm('Dieses Spiel ist seit über 20 Stunden inaktiv. Möchtest du ein neues Spiel unter dieser ID starten?')) {
       createNewGame(playerName, data.maxPlayers, passwordInput);
@@ -767,6 +767,8 @@ function loadActiveGames() {
     snap.forEach(child => {
       const g = child.val();
       g.id = child.key;
+      // Filter expired games
+      if (g.lastActive && (Date.now() - g.lastActive > EXPIRATION_MS)) return;
       games.push(g);
     });
     // Reverse to show newest first

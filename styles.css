@@ -1281,21 +1281,23 @@ button:not(:disabled):hover {
   }
 
   .board-cell-letter {
-    font-size: 4.5vw;
-    /* Responsive font size relative to viewport width */
+    font-size: 3.5vw;
+    /* Reduced to prevent overlap */
     margin-top: 0;
     line-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
+    padding-right: 2px;
+    /* Give space for score */
   }
 
   .board-cell-score {
-    font-size: 2vw;
+    font-size: 1.8vw;
     /* Responsive small font */
-    right: 1px;
-    top: 1px;
+    right: 0.5px;
+    top: 0.5px;
   }
 
   /* Optimize Rack for small screens */

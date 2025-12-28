@@ -166,6 +166,8 @@ const elements = {
   joinGameBtn: document.getElementById('joinGameBtn'),
   lobbyPlayerName: document.getElementById('lobbyPlayerName'),
   lobbyGameId: document.getElementById('lobbyGameId'),
+  lobbyPassword: document.getElementById('lobbyPassword'),
+  activeGamesList: document.getElementById('activeGamesList'),
   lobbyStatus: document.getElementById('lobbyStatus'),
   blankModal: document.getElementById('blankModal'),
   blankChoices: document.getElementById('blankChoices'),
@@ -197,6 +199,7 @@ let db, gameRef;
 
 // --- INITIALIZATION ---
 initDictionary();
+loadActiveGames();
 bindEvents();
 buildBlankChoices(); // Ensure blank choices are built
 
@@ -291,6 +294,7 @@ function buildBlankChoices() {
 function handleJoinGame() {
   const name = elements.lobbyPlayerName.value.trim();
   const gameId = elements.lobbyGameId.value.trim().toUpperCase();
+  const password = elements.lobbyPassword.value.trim();
   const maxPlayers = parseInt(elements.lobbyMaxPlayers.value, 10) || 4;
 
   if (!name || !gameId) {
@@ -314,9 +318,9 @@ function handleJoinGame() {
 
     gameRef.once('value').then((snapshot) => {
       if (snapshot.exists()) {
-        joinExistingGame(snapshot.val(), name);
+        joinExistingGame(snapshot.val(), name, password);
       } else {
-        createNewGame(name, maxPlayers);
+        createNewGame(name, maxPlayers, password);
       }
     }).catch(err => {
       console.error(err);
@@ -328,15 +332,21 @@ function handleJoinGame() {
   }
 }
 
-function joinExistingGame(data, playerName) {
+function joinExistingGame(data, playerName, passwordInput) {
   // Check for expiration (20 hours)
   const EXPIRATION_MS = 20 * 60 * 60 * 1000;
   if (data.lastActive && (Date.now() - data.lastActive > EXPIRATION_MS)) {
     if (confirm('Dieses Spiel ist seit über 20 Stunden inaktiv. Möchtest du ein neues Spiel unter dieser ID starten?')) {
-      createNewGame(playerName);
+      createNewGame(playerName, data.maxPlayers, passwordInput);
     } else {
       elements.lobbyStatus.textContent = 'Spiel ist abgelaufen.';
     }
+    return;
+  }
+
+  // Password Check
+  if (data.password && data.password !== passwordInput) {
+    elements.lobbyStatus.textContent = 'Falsches Passwort.';
     return;
   }
 
@@ -363,13 +373,14 @@ function joinExistingGame(data, playerName) {
   }
 }
 
-function createNewGame(playerName, maxPlayers = 4) {
+function createNewGame(playerName, maxPlayers = 4, password = '') {
   const idRef = { value: 1 };
   const bag = buildBagWithIds(idRef);
   const initialPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
   drawTilesForPlayer(initialPlayer, bag);
 
   const newGameData = {
+    password: password,
     maxPlayers: maxPlayers,
     board: createBoard(),
     bag: bag,
@@ -744,6 +755,55 @@ function renderGameSummary() {
   });
 }
 
+function loadActiveGames() {
+  if (typeof firebase === 'undefined') return;
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+
+  db.ref('games').orderByChild('lastActive').limitToLast(10).once('value').then(snap => {
+    if (!elements.activeGamesList) return;
+    elements.activeGamesList.innerHTML = '';
+    const games = [];
+    snap.forEach(child => {
+      const g = child.val();
+      g.id = child.key;
+      games.push(g);
+    });
+    // Reverse to show newest first
+    games.reverse();
+
+    if (games.length === 0) {
+      elements.activeGamesList.innerHTML = '<p class=\"landing-status\">Keine aktiven Spiele gefunden.</p>';
+      return;
+    }
+
+    games.forEach(g => {
+      if (g.gameOver) return;
+      const card = document.createElement('article');
+      card.className = 'board-card';
+      card.onclick = () => {
+        elements.lobbyGameId.value = g.id;
+        elements.lobbyPlayerName.focus();
+      };
+
+      const pCount = (g.players || []).length;
+      const turnInfo = g.turn > 1 ? `Zug ${g.turn}` : 'Lobby offen';
+      const isLocked = g.password ? '🔒 ' : '';
+
+      card.innerHTML = `
+        <div class="board-card-preview board-card-preview--mint" style="display:flex; align-items:center; justify-content:center; background: var(--surface-2);">
+          <h3 style="color:var(--text-1);">${g.id}</h3>
+        </div>
+        <div class="board-card-meta">
+          <h4>${isLocked}${pCount} / ${g.maxPlayers || 4} Spieler</h4>
+          <p>${turnInfo} · ${new Date(g.lastActive).toLocaleTimeString()}</p>
+        </div>
+      `;
+      elements.activeGamesList.appendChild(card);
+    });
+  });
+}
+
 function formatMoveWords(words) {
   if (!Array.isArray(words) || words.length === 0) return '-';
   return words.map(w => `${w.word} (+${w.score})`).join(', ');
@@ -900,9 +960,20 @@ function handlePass() {
   hist.unshift({ message: `${getCurrentPlayerObj().name} passt.` });
   updates['history'] = hist;
   updates['lastActive'] = Date.now();
-  gameRef.update(updates);
+
   const passLimit = (gameState.players || []).length * 3;
-  if (passLimit > 0 && updates.passes >= passLimit) finishGameRemote('passes');
+
+  if (passLimit > 0 && updates.passes >= passLimit) {
+    // Determine winner and close game, incorporating the latest history
+    gameRef.update(updates).then(() => {
+      // We need to pass the updated history to avoid overwriting it
+      // or rely on finishGameRemote reading fresh state? 
+      // Faster to just manually construct the final update here or pass hist.
+      finishGameRemote('passes', undefined, hist);
+    });
+  } else {
+    gameRef.update(updates);
+  }
 }
 
 // --- EXCHANGE ---
@@ -1171,14 +1242,14 @@ function calculateScore(board, wordInfo, placements) {
   return { word: wordInfo.word, score: score * wordMult };
 }
 
-function finishGameRemote(reason, pIdx) {
+function finishGameRemote(reason, pIdx, passedHistory) {
   const players = [...gameState.players];
   let deduction = 0;
   players.forEach(p => { const s = p.rack.reduce((a, b) => a + b.value, 0); p.score -= s; deduction += s; });
   if (pIdx !== undefined) players[pIdx].score += deduction;
   players.sort((a, b) => b.score - a.score);
   const w = players[0];
-  const hist = [...(gameState.history || [])];
+  const hist = passedHistory ? [...passedHistory] : [...(gameState.history || [])];
   hist.unshift({ message: `Spielende! Sieger: ${w.name}` });
   gameRef.update({ gameOver: true, players, winner: w, history: hist });
 }

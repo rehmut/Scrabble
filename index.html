@@ -21,6 +21,7 @@
         <div class="landing-form">
           <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
           <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
+          <input type="text" id="lobbyPassword" placeholder="Passwort (optional)" />
           <div class="landing-row">
             <select id="lobbyMaxPlayers">
               <option value="2">2 Spieler</option>
@@ -32,52 +33,8 @@
           <p id="lobbyStatus" class="landing-status"></p>
         </div>
       </div>
-      <div class="landing-gallery">
-        <article class="board-card">
-          <div class="board-card-preview board-card-preview--sunset">
-            <div class="mini-board">
-              <span>Q</span><span>U</span><span>E</span><span>R</span><span>K</span>
-              <span></span><span></span><span>A</span><span></span><span>O</span>
-              <span>S</span><span>P</span><span>I</span><span>E</span><span>L</span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span>W</span><span>O</span><span>R</span><span>T</span><span></span>
-            </div>
-          </div>
-          <div class="board-card-meta">
-            <h4>Finalrunde – 142 Punkte</h4>
-            <p>Anna besiegte Max mit einem Bingo auf Wort 12.</p>
-          </div>
-        </article>
-        <article class="board-card">
-          <div class="board-card-preview board-card-preview--mint">
-            <div class="mini-board">
-              <span>T</span><span>U</span><span>N</span><span>A</span><span></span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span>S</span><span>E</span><span>A</span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span>M</span><span>E</span><span>E</span><span>T</span><span>S</span>
-            </div>
-          </div>
-          <div class="board-card-meta">
-            <h4>Teamspiel – 118 Punkte</h4>
-            <p>Berlin vs. Hamburg, spannendes Kopf-an-Kopf-Rennen.</p>
-          </div>
-        </article>
-        <article class="board-card">
-          <div class="board-card-preview board-card-preview--midnight">
-            <div class="mini-board">
-              <span>B</span><span>L</span><span>O</span><span>C</span><span>K</span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span><span></span>
-              <span>P</span><span>U</span><span>N</span><span>K</span><span>T</span>
-            </div>
-          </div>
-          <div class="board-card-meta">
-            <h4>Best of the Week</h4>
-            <p>Jede Woche neue Community-Highlights.</p>
-          </div>
-        </article>
+      <div class="landing-gallery" id="activeGamesList">
+        <p style="color: var(--text-muted);">Lade laufende Spiele …</p>
       </div>
     </div>
   </section>

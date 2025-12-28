@@ -299,6 +299,10 @@ body {
 }
 
 .bingo-indicator.is-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: rgba(93, 224, 230, 0.3) !important;
+  box-shadow: 0 0 20px rgba(93, 224, 230, 0.3);
   opacity: 1;
   transform: translateY(0);
   animation: bingoBlink 1.2s infinite;
@@ -308,9 +312,11 @@ body {
   0% {
     box-shadow: 0 0 0 0 rgba(93, 224, 230, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(93, 224, 230, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(93, 224, 230, 0);
   }
@@ -398,7 +404,7 @@ body {
   gap: 16px;
 }
 
-.panel-card + .panel-card {
+.panel-card+.panel-card {
   margin-top: 8px;
 }
 

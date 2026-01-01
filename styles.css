@@ -1077,6 +1077,11 @@ button:not(:disabled):hover {
   transition: opacity 0.2s ease;
 }
 
+.modal.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
 .modal-card {
   background: var(--bg-panel);
   padding: 24px;
@@ -1340,25 +1345,30 @@ button:not(:disabled):hover {
     /* Use theme variable instead of hardcoded gray */
   }
 
-  /* Ensure premium squares keep their colors on mobile */
-  .board-cell.cell-word2 {
+  /* Premium squares - only when EMPTY */
+  .board-cell.cell-word2:not(.has-letter) {
     background: var(--cell-dw);
   }
 
-  .board-cell.cell-word3 {
+  .board-cell.cell-word3:not(.has-letter) {
     background: var(--cell-tw);
   }
 
-  .board-cell.cell-letter2 {
+  .board-cell.cell-letter2:not(.has-letter) {
     background: var(--cell-dl);
   }
 
-  .board-cell.cell-letter3 {
+  .board-cell.cell-letter3:not(.has-letter) {
     background: var(--cell-tl);
   }
 
-  .board-cell.cell-center {
+  .board-cell.cell-center:not(.has-letter) {
     background: var(--cell-center);
+  }
+
+  /* Ensure tiles always keep their background */
+  .board-cell.has-letter {
+    background: var(--tile-bg) !important;
   }
 
   /* Improve label visibility on mobile */
@@ -1372,8 +1382,8 @@ button:not(:disabled):hover {
   }
 
   .board-cell-letter {
-    font-size: 3.2vw;
-    /* Reduced to prevent overlap */
+    font-size: clamp(14px, 4.8vw, 20px);
+    /* Larger for better readability on mobile */
     margin-top: 0;
     line-height: 100%;
     display: flex;

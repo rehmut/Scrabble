@@ -9,10 +9,70 @@
   --text: #f5f7fb;
   --text-muted: #a8b0c4;
   --tile-bg: #F0EAD6;
-  /* Bone color for tiles */
+  /* Bone color for tiles (RESTORED) */
   --tile-text: #000000;
   /* Black text for tiles */
   --shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+
+  /* BOARD COLORS - DEFAULT (Classic) */
+  --board-bg: #4CAF50;
+  --board-grid: rgba(255, 255, 255, 0.04);
+  --cell-dl: #87CEEB;
+  /* Double Letter */
+  --cell-tl: #1565C0;
+  /* Triple Letter */
+  --cell-dw: #FFB6C1;
+  /* Double Word */
+  --cell-tw: #FF5252;
+  /* Triple Word */
+  --cell-center: #FFB6C1;
+  --cell-locked: #F0EAD6;
+  /* Same as tile-bg usually */
+}
+
+/* THEMES */
+
+/* DARK (Neon/Night) */
+[data-theme="dark"] {
+  --board-bg: #1a1b26;
+  --board-grid: rgba(255, 255, 255, 0.1);
+  --cell-dl: #2ac3de;
+  --cell-tl: #7aa2f7;
+  --cell-dw: #bb9af7;
+  --cell-tw: #f7768e;
+  --cell-center: #bb9af7;
+  --cell-locked: #24283b;
+  --tile-bg: #414868;
+  --tile-text: #c0caf5;
+}
+
+/* OCEAN (Blue/Teal) */
+[data-theme="ocean"] {
+  --board-bg: #0f172a;
+  --board-grid: rgba(56, 189, 248, 0.1);
+  --cell-dl: #38bdf8;
+  --cell-tl: #0ea5e9;
+  --cell-dw: #818cf8;
+  --cell-tw: #6366f1;
+  --cell-center: #818cf8;
+  --tile-bg: #e0f2fe;
+  --tile-text: #0c4a6e;
+}
+
+/* HIGH CONTRAST */
+[data-theme="contrast"] {
+  --board-bg: #000000;
+  --board-grid: #ffffff;
+  --cell-dl: #ffff00;
+  /* Yellow */
+  --cell-tl: #0000ff;
+  /* Blue */
+  --cell-dw: #ffffff;
+  /* White  */
+  --cell-tw: #ff0000;
+  /* Red */
+  --cell-center: #ffffff;
+  /* Need text handling for contrast */
 }
 
 * {
@@ -645,9 +705,9 @@ body {
   position: relative;
   border-radius: 8px;
   padding: 6px;
-  background: #4CAF50;
+  background: var(--board-bg);
   /* Green for cells */
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--board-grid);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -707,37 +767,37 @@ body {
 }
 
 .board-cell.locked-letter {
-  background: var(--tile-bg);
+  background: var(--cell-locked);
   /* Keep the bone color for locked tiles */
 }
 
 .cell-word2 {
-  background: #FFB6C1;
+  background: var(--cell-dw);
   /* Double Word - Pink */
   color: #333;
   /* Ensure label text is visible */
 }
 
 .cell-word3 {
-  background: #FF5252;
+  background: var(--cell-tw);
   /* Triple Word - Red */
   color: #fff;
 }
 
 .cell-letter2 {
-  background: #87CEEB;
+  background: var(--cell-dl);
   /* Double Letter - Light Blue */
   color: #333;
 }
 
 .cell-letter3 {
-  background: #1565C0;
+  background: var(--cell-tl);
   /* Triple Letter - Dark Blue */
   color: #fff;
 }
 
 .cell-center {
-  background: #FFB6C1;
+  background: var(--cell-center);
   /* Center star is usually Double Word (Pink) */
   border: 2px dashed rgba(255, 255, 255, 0.5);
 }
@@ -1276,12 +1336,43 @@ button:not(:disabled):hover {
     border-radius: 0;
     padding: 0;
     font-size: 0.75rem;
-    background-color: #666;
-    /* Lighter grey for empty fields */
+    background: var(--board-bg);
+    /* Use theme variable instead of hardcoded gray */
+  }
+
+  /* Ensure premium squares keep their colors on mobile */
+  .board-cell.cell-word2 {
+    background: var(--cell-dw);
+  }
+
+  .board-cell.cell-word3 {
+    background: var(--cell-tw);
+  }
+
+  .board-cell.cell-letter2 {
+    background: var(--cell-dl);
+  }
+
+  .board-cell.cell-letter3 {
+    background: var(--cell-tl);
+  }
+
+  .board-cell.cell-center {
+    background: var(--cell-center);
+  }
+
+  /* Improve label visibility on mobile */
+  .board-cell::before {
+    font-size: 0.75rem;
+    /* Larger than desktop's 0.65rem */
+    font-weight: 600;
+    /* Bolder */
+    opacity: 0.85;
+    /* More visible than desktop's 0.6 */
   }
 
   .board-cell-letter {
-    font-size: 3.5vw;
+    font-size: 3.2vw;
     /* Reduced to prevent overlap */
     margin-top: 0;
     line-height: 100%;
@@ -1289,15 +1380,16 @@ button:not(:disabled):hover {
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding-right: 2px;
-    /* Give space for score */
+    padding-right: 4px;
+    /* More space for score */
+    padding-top: 2px;
   }
 
   .board-cell-score {
-    font-size: 1.8vw;
+    font-size: 1.6vw;
     /* Responsive small font */
-    right: 0.5px;
-    top: 0.5px;
+    right: 1px;
+    top: 1px;
   }
 
   /* Optimize Rack for small screens */
@@ -1370,4 +1462,14 @@ button:not(:disabled):hover {
 
 .hidden {
   display: none !important;
+}
+
+/* Ensure Bingo Indicator Visibility */
+.bingo-indicator {
+  visibility: hidden;
+}
+
+.bingo-indicator.is-active {
+  visibility: visible !important;
+  display: block;
 }

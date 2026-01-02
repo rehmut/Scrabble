@@ -91,140 +91,129 @@ body {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: clamp(2rem, 5vw, 4rem);
-  background: linear-gradient(135deg, rgba(8, 9, 20, 0.9), rgba(9, 13, 34, 0.7));
+  justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(circle at top, #131524 0%, #05060a 55%);
 }
 
 .landing-screen.hidden {
   display: none;
 }
 
-.landing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: clamp(2rem, 4vw, 4rem);
+.landing-card {
+  background: rgba(15, 16, 24, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 48px;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.landing-hero h1 {
-  margin-top: 0;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.8rem;
-  color: var(--accent);
-  margin-bottom: 0.5rem;
-}
-
-.landing-copy {
-  color: var(--text-muted);
-  max-width: 46ch;
-  line-height: 1.5;
-}
-
-.landing-form {
-  margin-top: 24px;
+  max-width: 420px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 420px;
-}
-
-.landing-form input,
-.landing-form select {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.35);
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.landing-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.landing-row select {
-  flex: 1 1 150px;
-}
-
-.landing-row button {
-  flex: 1;
-}
-
-.landing-status {
-  min-height: 1.2em;
-  font-size: 0.85rem;
-  color: var(--danger);
-}
-
-.landing-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
-.board-card {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+.landing-logo {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 12px;
+  margin-bottom: 24px;
+  justify-content: center;
 }
 
-.board-card-preview {
+.landing-logo svg {
+  width: 32px;
+  height: 32px;
+  fill: var(--accent);
+}
+
+.landing-logo h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.landing-input,
+.landing-select {
+  width: 100%;
+  padding: 16px 18px;
   border-radius: 14px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
-.board-card-preview--sunset {
-  background: linear-gradient(135deg, #f093fb44, #f5576c44);
+.landing-input:focus,
+.landing-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.4);
 }
 
-.board-card-preview--mint {
-  background: linear-gradient(135deg, #5de0e644, #4fd1c544);
+.landing-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.5;
 }
 
-.board-card-preview--midnight {
-  background: linear-gradient(135deg, #1f1c2c44, #928dab44);
-}
-
-.mini-board {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-}
-
-.mini-board span {
+.landing-button {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #0a0b10;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  font-weight: 700;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.board-card-meta h4 {
-  margin: 0;
-  font-size: 1.1rem;
+.landing-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(93, 224, 230, 0.4);
 }
 
-.board-card-meta p {
+.landing-button .arrow {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.landing-button:hover .arrow {
+  transform: translateX(4px);
+}
+
+.landing-status {
+  text-align: center;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--danger);
   margin: 0;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .landing-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .landing-logo h1 {
+    font-size: 1.25rem;
+  }
+
+  .landing-input,
+  .landing-select,
+  .landing-button {
+    padding: 14px 16px;
+  }
 }
 
 .game-shell {
@@ -1183,10 +1172,6 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 1100px) {
-  .landing-grid {
-    grid-template-columns: 1fr;
-  }
-
   .game-toolbar {
     flex-direction: column;
     align-items: flex-start;

@@ -10,32 +10,32 @@
 
 <body>
   <section class="landing-screen is-visible" id="landingScreen">
-    <div class="landing-grid">
-      <div class="landing-hero">
-        <p class="eyebrow">Scrabble Online</p>
-        <h1>Hier starten fertige Bretter neue Partien</h1>
-        <p class="landing-copy">
-          Wir speichern vollständige Spiele, damit du inspirieren kannst. Wähle einen Raum, lade Freundinnen ein
-          und spiele direkt im Browser – ohne Pop-ups.
-        </p>
-        <div class="landing-form">
-          <input type="text" id="lobbyPlayerName" placeholder="Dein Name" />
-          <input type="text" id="lobbyGameId" placeholder="Spiel-ID (z.B. RAUM1)" />
-          <input type="text" id="lobbyPassword" placeholder="Passwort (optional)" />
-          <div class="landing-row">
-            <select id="lobbyMaxPlayers">
-              <option value="2">2 Spieler</option>
-              <option value="3">3 Spieler</option>
-              <option value="4">4 Spieler</option>
-            </select>
-            <button id="joinGameBtn" class="primary">Spiel beitreten / starten</button>
-          </div>
-          <p id="lobbyStatus" class="landing-status"></p>
-        </div>
+    <div class="landing-card">
+      <div class="landing-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+          <rect width="30" height="30" x="1" y="1" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+          <text x="16" y="22" text-anchor="middle" font-size="18" font-weight="bold" fill="currentColor">S</text>
+          <text x="24" y="28" text-anchor="end" font-size="8" fill="currentColor">1</text>
+        </svg>
+        <h1>Scrabble</h1>
       </div>
-      <div class="landing-gallery" id="activeGamesList">
-        <p style="color: var(--text-muted);">Lade laufende Spiele …</p>
-      </div>
+
+      <input type="text" id="lobbyPlayerName" placeholder="Your Name" class="landing-input" />
+      <input type="text" id="lobbyGameId" placeholder="Room Code" class="landing-input" />
+      <input type="password" id="lobbyPassword" placeholder="Password (optional)" class="landing-input" />
+
+      <select id="lobbyMaxPlayers" class="landing-select">
+        <option value="2">2 Players</option>
+        <option value="3">3 Players</option>
+        <option value="4">4 Players</option>
+      </select>
+
+      <button id="joinGameBtn" class="landing-button">
+        Join / Start Game
+        <span class="arrow">→</span>
+      </button>
+
+      <p id="lobbyStatus" class="landing-status"></p>
     </div>
   </section>
 

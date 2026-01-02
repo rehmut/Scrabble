@@ -200,7 +200,6 @@ let db, gameRef;
 
 // --- INITIALIZATION ---
 initDictionary();
-loadActiveGames();
 bindEvents();
 buildBlankChoices(); // Ensure blank choices are built
 
@@ -763,57 +762,6 @@ function renderGameSummary() {
     });
     section.appendChild(table);
     elements.gameOverSummary.appendChild(section);
-  });
-}
-
-function loadActiveGames() {
-  if (typeof firebase === 'undefined') return;
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  db = firebase.database();
-
-  db.ref('games').orderByChild('lastActive').limitToLast(10).once('value').then(snap => {
-    if (!elements.activeGamesList) return;
-    elements.activeGamesList.innerHTML = '';
-    const games = [];
-    snap.forEach(child => {
-      const g = child.val();
-      g.id = child.key;
-      // Filter expired games or games without timestamp
-      if (!g.lastActive || (Date.now() - g.lastActive > EXPIRATION_MS)) return;
-      games.push(g);
-    });
-    // Reverse to show newest first
-    games.reverse();
-
-    if (games.length === 0) {
-      elements.activeGamesList.innerHTML = '<p class=\"landing-status\">Keine aktiven Spiele gefunden.</p>';
-      return;
-    }
-
-    games.forEach(g => {
-      if (g.gameOver) return;
-      const card = document.createElement('article');
-      card.className = 'board-card';
-      card.onclick = () => {
-        elements.lobbyGameId.value = g.id;
-        elements.lobbyPlayerName.focus();
-      };
-
-      const pCount = (g.players || []).length;
-      const turnInfo = g.turn > 1 ? `Zug ${g.turn}` : 'Lobby offen';
-      const isLocked = g.password ? '🔒 ' : '';
-
-      card.innerHTML = `
-        <div class="board-card-preview board-card-preview--mint" style="display:flex; align-items:center; justify-content:center; background: var(--surface-2);">
-          <h3 style="color:var(--text-1);">${g.id}</h3>
-        </div>
-        <div class="board-card-meta">
-          <h4>${isLocked}${pCount} / ${g.maxPlayers || 4} Spieler</h4>
-          <p>${turnInfo} · ${new Date(g.lastActive).toLocaleTimeString()}</p>
-        </div>
-      `;
-      elements.activeGamesList.appendChild(card);
-    });
   });
 }
 

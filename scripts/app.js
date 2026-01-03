@@ -920,7 +920,10 @@ function handleRackClick(e) {
 }
 
 function handleBoardClick(e) {
-  if (gameState.gameOver || !localState.isMyTurn) return;
+  // In competitive mode, all players can place tiles; in standard mode, only on their turn
+  const canPlace = gameState.gameMode === 'competitive' ? !gameState.gameOver : (localState.isMyTurn && !gameState.gameOver);
+  if (!canPlace) return;
+
   const cellEl = e.target.closest('.board-cell');
   if (!cellEl) return;
   const row = Number(cellEl.dataset.row);

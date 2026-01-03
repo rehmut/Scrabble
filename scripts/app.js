@@ -2017,17 +2017,23 @@ function handleCompetitiveSubmit() {
   }
 
   const submission = {
-    placements: val.placements.map(p => ({
-      row: p.row,
-      col: p.col,
-      tile: {
+    placements: val.placements.map(p => {
+      const tileObj = {
         id: p.tile.id,
         letter: p.tile.letter,
         value: p.tile.value,
-        isBlank: p.tile.isBlank,
-        assignedLetter: p.tile.assignedLetter
+        isBlank: p.tile.isBlank
+      };
+      // Only include assignedLetter if it exists (for blank tiles)
+      if (p.tile.assignedLetter !== undefined) {
+        tileObj.assignedLetter = p.tile.assignedLetter;
       }
-    })),
+      return {
+        row: p.row,
+        col: p.col,
+        tile: tileObj
+      };
+    }),
     words: val.words,
     score: val.score,
     submittedAt: firebase.database.ServerValue.TIMESTAMP,

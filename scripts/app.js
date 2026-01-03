@@ -537,7 +537,7 @@ function syncLocalState() {
     }
 
     // Reset local submission state when new round starts
-    if (!round.submissions[localState.myPlayerId]) {
+    if (!round.submissions || !round.submissions[localState.myPlayerId]) {
       localState.hasSubmittedThisRound = false;
     }
   }
@@ -2251,7 +2251,7 @@ function renderCompetitivePanel() {
       const status = document.createElement('div');
       status.className = 'submission-status';
 
-      const hasSubmitted = round.submissions[player.id];
+      const hasSubmitted = (round.submissions || {})[player.id];
       status.classList.add(hasSubmitted ? 'submitted' : 'pending');
 
       const nameSpan = document.createElement('span');

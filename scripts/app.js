@@ -15,6 +15,8 @@ const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
 const BINGO_BONUS = 50;
 const EXPIRATION_MS = 1 * 60 * 60 * 1000; // 1 hour
+const COMPETITIVE_TIMER_DURATION = 30000; // 30 seconds
+const ROOM_BROWSER_REFRESH_INTERVAL = 10000; // 10 seconds
 const REMOTE_DICTIONARY_SOURCES = [
   'https://raw.githubusercontent.com/kamilmielnik/scrabble-dictionaries/master/german/german.txt', // Better source
   'https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/de/de_50k.txt',
@@ -131,7 +133,13 @@ const localState = {
   myPlayerId: localStorage.getItem('scrabble_player_id') || `P_${Math.random().toString(36).substr(2, 9)}`,
   gameId: null,
   isMyTurn: false,
-  gameOverShown: false
+  gameOverShown: false,
+  // NEW: Competitive mode state
+  hasSubmittedThisRound: false,
+  competitiveTimerInterval: null,
+  // NEW: Room browser state
+  roomBrowserInterval: null,
+  publicRoomsRef: null
 };
 localStorage.setItem('scrabble_player_id', localState.myPlayerId);
 
@@ -309,6 +317,9 @@ function handleJoinGame() {
   const gameId = elements.lobbyGameId.value.trim().toUpperCase();
   const password = elements.lobbyPassword.value.trim();
   const maxPlayers = parseInt(elements.lobbyMaxPlayers.value, 10) || 4;
+  const gameMode = document.getElementById('lobbyGameMode')?.value || 'standard';
+  const isPublic = document.getElementById('lobbyIsPublic')?.checked ?? true;
+  const roomName = document.getElementById('lobbyRoomName')?.value.trim() || '';
 
   if (!name || !gameId) {
     elements.lobbyStatus.textContent = 'Bitte Name und Spiel-ID eingeben.';
@@ -333,7 +344,7 @@ function handleJoinGame() {
       if (snapshot.exists()) {
         joinExistingGame(snapshot.val(), name, password);
       } else {
-        createNewGame(name, maxPlayers, password);
+        createNewGame(name, maxPlayers, password, gameMode, isPublic, roomName);
       }
     }).catch(err => {
       console.error(err);
@@ -378,22 +389,57 @@ function joinExistingGame(data, playerName, passwordInput) {
 
     const newPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
     const bag = [...(data.bag || [])];
-    drawTilesForPlayer(newPlayer, bag);
+
+    // In competitive mode, give player the same shared tiles
+    if (data.gameMode === 'competitive' && data.competitiveRound && data.competitiveRound.sharedTiles) {
+      newPlayer.rack = [...data.competitiveRound.sharedTiles];
+    } else {
+      drawTilesForPlayer(newPlayer, bag);
+    }
 
     players.push(newPlayer);
-    gameRef.update({ players, bag, lastActive: Date.now() }).then(startGameListener);
+
+    const updates = {
+      players,
+      bag,
+      lastActive: Date.now()
+    };
+
+    // Update public rooms count
+    gameRef.update(updates).then(() => {
+      if (data.isPublic) {
+        db.ref(`publicRooms/${localState.gameId}/players`).set(players.length);
+        db.ref(`publicRooms/${localState.gameId}/lastActive`).set(Date.now());
+      }
+      startGameListener();
+    });
   }
 }
 
-function createNewGame(playerName, maxPlayers = 4, password = '') {
+function createNewGame(playerName, maxPlayers = 4, password = '', gameMode = 'standard', isPublic = true, roomName = '') {
   const idRef = { value: 1 };
   const bag = buildBagWithIds(idRef);
   const initialPlayer = { id: localState.myPlayerId, name: playerName, score: 0, rack: [] };
-  drawTilesForPlayer(initialPlayer, bag);
+
+  // In competitive mode, generate shared tiles instead of individual racks
+  if (gameMode === 'competitive') {
+    const sharedTiles = [];
+    for (let i = 0; i < 7 && bag.length > 0; i++) {
+      const idx = Math.floor(Math.random() * bag.length);
+      sharedTiles.push(bag.splice(idx, 1)[0]);
+    }
+    initialPlayer.rack = [...sharedTiles];
+  } else {
+    drawTilesForPlayer(initialPlayer, bag);
+  }
 
   const newGameData = {
     password: password,
     maxPlayers: maxPlayers,
+    gameMode: gameMode,
+    isPublic: isPublic,
+    roomName: roomName || `${playerName}'s Game`,
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
     board: createBoard(),
     bag: bag,
     players: [initialPlayer],
@@ -404,10 +450,42 @@ function createNewGame(playerName, maxPlayers = 4, password = '') {
     nextTileId: idRef.value,
     gameOver: false,
     moves: [],
-    lastActive: Date.now()
+    lastActive: firebase.database.ServerValue.TIMESTAMP
   };
 
-  gameRef.set(newGameData).then(startGameListener);
+  // Add competitive mode structure
+  if (gameMode === 'competitive') {
+    newGameData.competitiveRound = {
+      roundNumber: 1,
+      sharedTiles: initialPlayer.rack,
+      submissions: {},
+      timerStartedAt: null,
+      timerDuration: COMPETITIVE_TIMER_DURATION,
+      timerExpired: false,
+      roundComplete: false,
+      winningPlayerId: null,
+      winningScore: 0
+    };
+  }
+
+  // Create game in main database
+  gameRef.set(newGameData).then(() => {
+    // Add to public rooms index if public
+    if (isPublic) {
+      const publicRoomRef = db.ref(`publicRooms/${localState.gameId}`);
+      publicRoomRef.set({
+        name: newGameData.roomName,
+        players: 1,
+        maxPlayers: maxPlayers,
+        hasPassword: Boolean(password),
+        gameMode: gameMode,
+        lastActive: firebase.database.ServerValue.TIMESTAMP,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+
+    startGameListener();
+  });
 }
 
 function startGameListener() {
@@ -443,6 +521,22 @@ function syncLocalState() {
   }
 
   if (!localState.isMyTurn && localState.placements.size > 0) handleRecall();
+
+  // Competitive mode logic
+  if (gameState.gameMode === 'competitive' && gameState.competitiveRound) {
+    const round = gameState.competitiveRound;
+
+    // Check if timer expired and round not processed yet
+    if (round.timerExpired && !round.roundComplete) {
+      // Only one client should process (simple approach: let first client that sees this state process it)
+      processCompetitiveRound();
+    }
+
+    // Reset local submission state when new round starts
+    if (!round.submissions[localState.myPlayerId]) {
+      localState.hasSubmittedThisRound = false;
+    }
+  }
 }
 
 // --- GAME LOGIC ---
@@ -508,6 +602,7 @@ function renderEverything() {
   updateTurnInfo();
   maybeEndByTiles();
   checkBingoMatches(); // Predict bingo on every update
+  renderCompetitivePanel(); // Update competitive mode UI
 
 
   if (gameState.gameOver) {
@@ -518,6 +613,16 @@ function renderEverything() {
       openGameOverModal();
       localState.gameOverShown = true;
     }
+  } else if (gameState.gameMode === 'competitive') {
+    // Competitive mode status messages
+    if (gameState.competitiveRound && gameState.competitiveRound.roundComplete) {
+      setStatus('Round complete! Starting next round...', 'success');
+    } else if (localState.hasSubmittedThisRound) {
+      setStatus('Waiting for other players...', 'info');
+    } else {
+      setStatus('Place your word and submit!', 'info');
+    }
+    localState.gameOverShown = false;
   } else if (localState.isMyTurn) {
     setStatus('Du bist am Zug!', 'info');
     localState.gameOverShown = false;
@@ -775,12 +880,29 @@ function updateTurnInfo() {
 }
 
 function updateControls() {
-  const myTurn = localState.isMyTurn;
-  const placed = localState.placements.size > 0;
-  elements.submitBtn.disabled = !myTurn || !placed || gameState.gameOver;
-  elements.recallBtn.disabled = !placed || gameState.gameOver;
-  elements.exchangeBtn.disabled = !myTurn || placed || gameState.gameOver || (gameState.bag || []).length < 7;
-  elements.passBtn.disabled = !myTurn || placed || gameState.gameOver;
+  const isCompetitive = gameState.gameMode === 'competitive';
+  const round = gameState.competitiveRound;
+
+  if (isCompetitive) {
+    // In competitive mode, all players can submit during active round
+    const roundActive = round && !round.roundComplete && !round.timerExpired;
+    const alreadySubmitted = localState.hasSubmittedThisRound;
+    const placed = localState.placements.size > 0;
+
+    elements.submitBtn.disabled = !roundActive || alreadySubmitted || !placed || gameState.gameOver;
+    elements.recallBtn.disabled = !placed || gameState.gameOver || alreadySubmitted;
+    elements.exchangeBtn.disabled = true; // Not allowed in competitive mode
+    elements.passBtn.disabled = true; // Not allowed in competitive mode
+    elements.shuffleBtn.disabled = gameState.gameOver;
+  } else {
+    // STANDARD MODE LOGIC
+    const myTurn = localState.isMyTurn;
+    const placed = localState.placements.size > 0;
+    elements.submitBtn.disabled = !myTurn || !placed || gameState.gameOver;
+    elements.recallBtn.disabled = !placed || gameState.gameOver;
+    elements.exchangeBtn.disabled = !myTurn || placed || gameState.gameOver || (gameState.bag || []).length < 7;
+    elements.passBtn.disabled = !myTurn || placed || gameState.gameOver;
+  }
 }
 
 function setStatus(msg, tone = 'info') {
@@ -1021,7 +1143,13 @@ function handleLeaveGame() {
 
   if (newPlayers.length === 0) {
     // Delete game if empty
-    gameRef.remove().then(() => location.reload());
+    gameRef.remove().then(() => {
+      // Remove from public rooms
+      if (gameState.isPublic && db) {
+        db.ref(`publicRooms/${localState.gameId}`).remove();
+      }
+      location.reload();
+    });
   } else {
     const updates = {};
     updates['players'] = newPlayers;
@@ -1044,7 +1172,13 @@ function handleLeaveGame() {
     updates['history'] = hist;
     updates['lastActive'] = Date.now();
 
-    gameRef.update(updates).then(() => location.reload()).catch(err => {
+    gameRef.update(updates).then(() => {
+      // Update public rooms player count
+      if (gameState.isPublic && db) {
+        db.ref(`publicRooms/${localState.gameId}/players`).set(newPlayers.length);
+      }
+      location.reload();
+    }).catch(err => {
       console.error(err);
       alert('Fehler beim Verlassen: ' + err.message);
     });
@@ -1052,6 +1186,14 @@ function handleLeaveGame() {
 }
 
 function handleSubmitMove() {
+  if (gameState.gameMode === 'competitive') {
+    handleCompetitiveSubmit();
+  } else {
+    handleStandardSubmit();
+  }
+}
+
+function handleStandardSubmit() {
   const val = validateMove();
   if (!val.valid) { setStatus(val.message, 'error'); return; }
 
@@ -1637,5 +1779,496 @@ function updateBingoIndicator(active) {
     el.querySelector('span').textContent = 'Bingo möglich! +50';
   } else {
     el.classList.remove('is-active');
+  }
+}
+
+// === NEW FEATURES IMPLEMENTATION ===
+
+// --- INVITE LINK SYSTEM ---
+function checkInviteLink() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteGameId = urlParams.get('invite');
+
+  if (inviteGameId) {
+    elements.lobbyGameId.value = inviteGameId.toUpperCase();
+    elements.lobbyPlayerName.focus();
+    window.history.replaceState({}, document.title, window.location.pathname);
+    elements.lobbyStatus.textContent = 'Invited to game! Enter your name to join.';
+    elements.lobbyStatus.style.color = 'var(--success)';
+  }
+}
+
+function copyInviteLink() {
+  if (!localState.gameId) return;
+
+  const inviteUrl = `${window.location.origin}${window.location.pathname}?invite=${localState.gameId}`;
+
+  navigator.clipboard.writeText(inviteUrl).then(() => {
+    showToast('Link copied!');
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    prompt('Copy this link:', inviteUrl);
+  });
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// Call checkInviteLink on page load
+checkInviteLink();
+
+// Bind copy invite link button
+const copyInviteLinkBtn = document.getElementById('copyInviteLinkBtn');
+if (copyInviteLinkBtn) {
+  copyInviteLinkBtn.addEventListener('click', copyInviteLink);
+}
+
+// --- ROOM BROWSER IMPLEMENTATION ---
+function openRoomBrowser() {
+  const modal = document.getElementById('roomBrowserModal');
+  if (!modal) return;
+
+  modal.classList.add('show');
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'all';
+
+  loadPublicRooms();
+
+  if (localState.roomBrowserInterval) clearInterval(localState.roomBrowserInterval);
+  localState.roomBrowserInterval = setInterval(loadPublicRooms, ROOM_BROWSER_REFRESH_INTERVAL);
+}
+
+function closeRoomBrowser() {
+  const modal = document.getElementById('roomBrowserModal');
+  if (!modal) return;
+
+  modal.classList.remove('show');
+  modal.style.opacity = '0';
+  modal.style.pointerEvents = 'none';
+
+  if (localState.roomBrowserInterval) {
+    clearInterval(localState.roomBrowserInterval);
+    localState.roomBrowserInterval = null;
+  }
+}
+
+function loadPublicRooms() {
+  if (!db) return;
+
+  const publicRoomsRef = db.ref('publicRooms');
+  const cutoffTime = Date.now() - EXPIRATION_MS;
+
+  publicRoomsRef
+    .orderByChild('lastActive')
+    .startAt(cutoffTime)
+    .limitToLast(20)
+    .once('value')
+    .then(snapshot => {
+      const rooms = [];
+      snapshot.forEach(childSnapshot => {
+        const gameId = childSnapshot.key;
+        const data = childSnapshot.val();
+
+        if (data.players < data.maxPlayers && data.lastActive > cutoffTime) {
+          rooms.push({ gameId, ...data });
+        }
+      });
+
+      renderRoomList(rooms);
+
+      const badge = document.getElementById('roomBadge');
+      if (badge) {
+        if (rooms.length > 0) {
+          badge.textContent = rooms.length;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    })
+    .catch(err => console.error('Error loading rooms:', err));
+}
+
+function renderRoomList(rooms) {
+  const roomList = document.getElementById('roomList');
+  if (!roomList) return;
+
+  roomList.innerHTML = '';
+
+  if (rooms.length === 0) {
+    roomList.innerHTML = '<p class="game-over-empty">No open rooms available. Create your own!</p>';
+    return;
+  }
+
+  rooms.sort((a, b) => b.lastActive - a.lastActive);
+
+  rooms.forEach(room => {
+    const item = document.createElement('div');
+    item.className = 'room-item';
+
+    const info = document.createElement('div');
+    info.className = 'room-item-info';
+
+    const name = document.createElement('div');
+    name.className = 'room-item-name';
+    name.textContent = room.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'room-item-meta';
+
+    const playersBadge = document.createElement('span');
+    playersBadge.className = 'room-item-badge';
+    playersBadge.textContent = `${room.players}/${room.maxPlayers} players`;
+
+    const modeBadge = document.createElement('span');
+    modeBadge.className = 'room-item-badge';
+    modeBadge.textContent = room.gameMode === 'competitive' ? 'Competitive' : 'Standard';
+    if (room.gameMode === 'competitive') {
+      modeBadge.style.background = 'rgba(255, 95, 126, 0.2)';
+      modeBadge.style.color = 'var(--danger)';
+    }
+
+    if (room.hasPassword) {
+      const lockBadge = document.createElement('span');
+      lockBadge.className = 'room-item-badge';
+      lockBadge.textContent = '🔒 Password';
+      meta.appendChild(lockBadge);
+    }
+
+    meta.append(playersBadge, modeBadge);
+    info.append(name, meta);
+
+    const joinBtn = document.createElement('button');
+    joinBtn.className = 'primary';
+    joinBtn.textContent = 'Join';
+    joinBtn.style.padding = '8px 16px';
+    joinBtn.onclick = () => joinRoomFromBrowser(room.gameId, room.hasPassword);
+
+    item.append(info, joinBtn);
+    roomList.appendChild(item);
+  });
+}
+
+function joinRoomFromBrowser(gameId, hasPassword) {
+  closeRoomBrowser();
+  elements.lobbyGameId.value = gameId;
+
+  if (hasPassword) {
+    elements.lobbyPassword.focus();
+  } else {
+    elements.lobbyPlayerName.focus();
+  }
+
+  elements.lobbyStatus.textContent = 'Enter your details to join this room';
+}
+
+// Bind room browser events
+const floatingRoomBrowserBtn = document.getElementById('floatingRoomBrowserBtn');
+if (floatingRoomBrowserBtn) {
+  floatingRoomBrowserBtn.addEventListener('click', openRoomBrowser);
+}
+
+const closeRoomsBtn = document.querySelector('[data-close-rooms]');
+if (closeRoomsBtn) {
+  closeRoomsBtn.addEventListener('click', closeRoomBrowser);
+}
+
+const refreshRoomsBtn = document.getElementById('refreshRoomsBtn');
+if (refreshRoomsBtn) {
+  refreshRoomsBtn.addEventListener('click', loadPublicRooms);
+}
+
+// --- COMPETITIVE MODE IMPLEMENTATION ---
+function handleCompetitiveSubmit() {
+  const val = validateMove();
+  if (!val.valid) {
+    setStatus(val.message, 'error');
+    return;
+  }
+
+  const player = getCurrentPlayerObj();
+  const round = gameState.competitiveRound;
+
+  if (localState.hasSubmittedThisRound) {
+    setStatus('Already submitted for this round!', 'error');
+    return;
+  }
+
+  const submission = {
+    placements: val.placements.map(p => ({
+      row: p.row,
+      col: p.col,
+      tile: {
+        id: p.tile.id,
+        letter: p.tile.letter,
+        value: p.tile.value,
+        isBlank: p.tile.isBlank,
+        assignedLetter: p.tile.assignedLetter
+      }
+    })),
+    words: val.words,
+    score: val.score,
+    submittedAt: firebase.database.ServerValue.TIMESTAMP,
+    isFirstSubmitter: !round.timerStartedAt
+  };
+
+  const updates = {};
+  updates[`competitiveRound/submissions/${player.id}`] = submission;
+
+  // If first submitter, start timer
+  if (!round.timerStartedAt) {
+    updates['competitiveRound/timerStartedAt'] = firebase.database.ServerValue.TIMESTAMP;
+  }
+
+  gameRef.update(updates).then(() => {
+    localState.hasSubmittedThisRound = true;
+    localState.placements.clear();
+    setStatus('Submission received! Waiting for others...', 'success');
+    renderRack();
+    renderBoard();
+    updateControls();
+  });
+}
+
+function startCompetitiveTimer() {
+  const round = gameState.competitiveRound;
+  if (!round || !round.timerStartedAt) return;
+
+  if (localState.competitiveTimerInterval) {
+    clearInterval(localState.competitiveTimerInterval);
+  }
+
+  localState.competitiveTimerInterval = setInterval(() => {
+    const elapsed = Date.now() - round.timerStartedAt;
+    const remaining = Math.max(0, round.timerDuration - elapsed);
+
+    const seconds = Math.floor(remaining / 1000);
+    const ms = remaining % 1000;
+
+    const timerEl = document.getElementById('compTimer');
+    if (timerEl) {
+      timerEl.textContent = `${seconds}.${Math.floor(ms / 100)}s`;
+
+      if (remaining === 0) {
+        timerEl.classList.remove('active');
+        clearInterval(localState.competitiveTimerInterval);
+
+        if (!round.timerExpired) {
+          gameRef.child('competitiveRound/timerExpired').set(true);
+        }
+      } else if (remaining < 10000) {
+        timerEl.classList.add('active');
+      }
+    }
+  }, 100);
+}
+
+function stopCompetitiveTimer() {
+  if (localState.competitiveTimerInterval) {
+    clearInterval(localState.competitiveTimerInterval);
+    localState.competitiveTimerInterval = null;
+  }
+}
+
+function processCompetitiveRound() {
+  const round = gameState.competitiveRound;
+
+  // Determine winner
+  let maxScore = -1;
+  let winnerId = null;
+
+  Object.entries(round.submissions).forEach(([playerId, submission]) => {
+    if (submission.score > maxScore) {
+      maxScore = submission.score;
+      winnerId = playerId;
+    }
+  });
+
+  if (!winnerId) {
+    startNextCompetitiveRound();
+    return;
+  }
+
+  const winningSubmission = round.submissions[winnerId];
+  const winner = gameState.players.find(p => p.id === winnerId);
+
+  // Apply winning placements to board
+  const updates = {};
+  winningSubmission.placements.forEach(p => {
+    const tile = p.tile;
+    updates[`board/${p.row}/${p.col}/letter`] = tile.isBlank ? (tile.assignedLetter || '?') : tile.letter;
+    updates[`board/${p.row}/${p.col}/value`] = tile.value;
+    updates[`board/${p.row}/${p.col}/locked`] = true;
+    updates[`board/${p.row}/${p.col}/tileId`] = tile.id;
+  });
+
+  // Update winner's score
+  const winnerIdx = gameState.players.findIndex(p => p.id === winnerId);
+  updates[`players/${winnerIdx}/score`] = winner.score + maxScore;
+
+  // Add to history
+  const hist = [...(gameState.history || [])];
+  const words = winningSubmission.words.map(w => `${w.word} (+${w.score})`).join(', ');
+  hist.unshift({ message: `🏆 ${winner.name} gewinnt Runde ${round.roundNumber}: ${words} · ${maxScore} Punkte` });
+  updates['history'] = hist;
+
+  // Log move
+  const moveLog = [...(gameState.moves || [])];
+  moveLog.push({
+    type: 'competitive_round',
+    roundNumber: round.roundNumber,
+    winnerId: winnerId,
+    winnerName: winner.name,
+    words: winningSubmission.words,
+    moveScore: maxScore,
+    turn: gameState.turn
+  });
+  updates['moves'] = moveLog;
+
+  // Mark round as complete
+  updates['competitiveRound/roundComplete'] = true;
+  updates['competitiveRound/winningPlayerId'] = winnerId;
+  updates['competitiveRound/winningScore'] = maxScore;
+  updates['lastActive'] = Date.now();
+
+  gameRef.update(updates).then(() => {
+    setTimeout(() => startNextCompetitiveRound(), 3000);
+  });
+}
+
+function startNextCompetitiveRound() {
+  const bag = [...(gameState.bag || [])];
+
+  if (bag.length < 7) {
+    finishCompetitiveGame();
+    return;
+  }
+
+  // Generate new shared tiles
+  const sharedTiles = [];
+  for (let i = 0; i < 7 && bag.length > 0; i++) {
+    const idx = Math.floor(Math.random() * bag.length);
+    sharedTiles.push(bag.splice(idx, 1)[0]);
+  }
+
+  // Give all players the same tiles
+  const updates = {};
+  gameState.players.forEach((player, idx) => {
+    updates[`players/${idx}/rack`] = [...sharedTiles];
+  });
+
+  updates['bag'] = bag;
+  updates['turn'] = gameState.turn + 1;
+
+  // Reset competitive round
+  updates['competitiveRound'] = {
+    roundNumber: gameState.competitiveRound.roundNumber + 1,
+    sharedTiles: sharedTiles,
+    submissions: {},
+    timerStartedAt: null,
+    timerDuration: COMPETITIVE_TIMER_DURATION,
+    timerExpired: false,
+    roundComplete: false,
+    winningPlayerId: null,
+    winningScore: 0
+  };
+
+  gameRef.update(updates).then(() => {
+    localState.hasSubmittedThisRound = false;
+  });
+}
+
+function finishCompetitiveGame() {
+  const players = [...gameState.players].sort((a, b) => b.score - a.score);
+  const winner = players[0];
+
+  const hist = [...(gameState.history || [])];
+  hist.unshift({ message: `Spielende! Sieger: ${winner.name} mit ${winner.score} Punkten` });
+
+  gameRef.update({
+    gameOver: true,
+    players: players,
+    winner: winner,
+    history: hist
+  });
+}
+
+function renderCompetitivePanel() {
+  const panel = document.getElementById('competitivePanel');
+  const round = gameState.competitiveRound;
+
+  if (!round || gameState.gameMode !== 'competitive') {
+    if (panel) panel.classList.add('hidden');
+    return;
+  }
+
+  if (panel) panel.classList.remove('hidden');
+
+  // Update round number
+  const roundNumEl = document.getElementById('compRoundNumber');
+  if (roundNumEl) roundNumEl.textContent = round.roundNumber;
+
+  // Update timer
+  if (round.timerStartedAt && !round.timerExpired && !round.roundComplete) {
+    startCompetitiveTimer();
+  } else {
+    stopCompetitiveTimer();
+    const timerEl = document.getElementById('compTimer');
+    if (timerEl) {
+      timerEl.textContent = round.roundComplete ? 'Complete' : '--:--';
+      timerEl.classList.remove('active');
+    }
+  }
+
+  // Update submissions status
+  const submissionsEl = document.getElementById('compSubmissions');
+  if (submissionsEl) {
+    submissionsEl.innerHTML = '';
+
+    gameState.players.forEach(player => {
+      const status = document.createElement('div');
+      status.className = 'submission-status';
+
+      const hasSubmitted = round.submissions[player.id];
+      status.classList.add(hasSubmitted ? 'submitted' : 'pending');
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = player.name + (player.id === localState.myPlayerId ? ' (You)' : '');
+      if (player.id === localState.myPlayerId) {
+        nameSpan.style.fontWeight = '600';
+      }
+
+      const statusSpan = document.createElement('span');
+      if (hasSubmitted) {
+        statusSpan.textContent = `✓ ${hasSubmitted.score} pts`;
+        statusSpan.style.color = 'var(--success)';
+      } else {
+        statusSpan.textContent = 'Waiting...';
+        statusSpan.style.color = 'var(--text-muted)';
+      }
+
+      status.append(nameSpan, statusSpan);
+      submissionsEl.appendChild(status);
+    });
+  }
+
+  // Show results if round complete
+  const resultsEl = document.getElementById('compResults');
+  if (resultsEl) {
+    if (round.roundComplete && round.winningPlayerId) {
+      const winner = gameState.players.find(p => p.id === round.winningPlayerId);
+      resultsEl.innerHTML = `
+        <h4>🏆 Round Winner: ${winner?.name || 'Unknown'}</h4>
+        <p>${round.winningScore} points</p>
+      `;
+      resultsEl.classList.remove('hidden');
+    } else {
+      resultsEl.classList.add('hidden');
+    }
   }
 }

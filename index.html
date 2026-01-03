@@ -30,6 +30,18 @@
         <option value="4">4 Players</option>
       </select>
 
+      <select id="lobbyGameMode" class="landing-select">
+        <option value="standard">Standard Mode</option>
+        <option value="competitive">Competitive Mode</option>
+      </select>
+
+      <label class="landing-checkbox">
+        <input type="checkbox" id="lobbyIsPublic" checked />
+        <span>Make room visible in browser</span>
+      </label>
+
+      <input type="text" id="lobbyRoomName" placeholder="Room Name (optional)" class="landing-input" />
+
       <button id="joinGameBtn" class="landing-button">
         Join / Start Game
         <span class="arrow">→</span>
@@ -47,6 +59,7 @@
       </div>
       <div class="toolbar-actions">
         <div id="statusMessage" class="status-message">Bereit für ein neues Spiel</div>
+        <button class="toolbar-btn" id="copyInviteLinkBtn" title="Copy invite link">Share</button>
         <button class="toolbar-btn" id="drawerToggleBtn">Info</button>
         <button class="toolbar-btn" data-open-history>Verlauf</button>
       </div>
@@ -80,6 +93,21 @@
         </div>
         <div id="bingoIndicator" class="bingo-indicator" aria-live="polite" aria-hidden="true">
           Bingo möglich! +50 Punkte
+        </div>
+
+        <div id="competitivePanel" class="competitive-panel hidden">
+          <div class="competitive-header">
+            <h3>Round <span id="compRoundNumber">1</span></h3>
+            <div id="compTimer" class="competitive-timer">--:--</div>
+          </div>
+
+          <div id="compSubmissions" class="competitive-submissions">
+            <!-- Player submission status -->
+          </div>
+
+          <div id="compResults" class="competitive-results hidden">
+            <!-- Round winner announcement -->
+          </div>
         </div>
       </section>
     </main>
@@ -192,6 +220,30 @@
   <button id="floatingChatBtn" class="floating-chat-btn">
     Chat <span id="chatBadge" class="chat-badge hidden"></span>
   </button>
+
+  <button id="floatingRoomBrowserBtn" class="floating-room-btn">
+    Rooms <span id="roomBadge" class="room-badge hidden">3</span>
+  </button>
+
+  <div id="roomBrowserModal" class="modal">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-header">
+        <h3>Open Rooms</h3>
+        <button class="icon-btn" data-close-rooms>&times;</button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Join an active game or create your own
+      </p>
+      <div id="roomList" class="room-list">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="room-browser-footer">
+        <button id="refreshRoomsBtn" class="ghost-btn">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">Link copied!</div>
 
   <!-- Firebase SDKs (Compat versions for easier local usage without modules) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>

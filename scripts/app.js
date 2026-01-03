@@ -501,6 +501,10 @@ function startGameListener() {
       if (!gameState.bag) gameState.bag = [];
       if (!gameState.history) gameState.history = [];
       if (!gameState.moves) gameState.moves = [];
+      if (!gameState.board) {
+        console.warn('Game loaded without board, creating new board...');
+        gameState.board = createBoard();
+      }
 
       syncLocalState();
       renderEverything();
@@ -594,49 +598,59 @@ function buildMultiplierMatrix() {
 }
 
 function renderEverything() {
-  renderBoard();
-  renderRack();
-  renderPlayers();
-  renderHistory();
-  updateControls();
-  updateTurnInfo();
-  maybeEndByTiles();
-  checkBingoMatches(); // Predict bingo on every update
-  renderCompetitivePanel(); // Update competitive mode UI
+  try {
+    renderBoard();
+    renderRack();
+    renderPlayers();
+    renderHistory();
+    updateControls();
+    updateTurnInfo();
+    maybeEndByTiles();
+    checkBingoMatches(); // Predict bingo on every update
+    renderCompetitivePanel(); // Update competitive mode UI
 
 
-  if (gameState.gameOver) {
-    const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
-    setStatus(`Spiel vorbei! Sieger: ${winnerName}`, 'success');
-    renderGameSummary();
-    if (!localState.gameOverShown) {
-      openGameOverModal();
-      localState.gameOverShown = true;
-    }
-  } else if (gameState.gameMode === 'competitive') {
-    // Competitive mode status messages
-    if (gameState.competitiveRound && gameState.competitiveRound.roundComplete) {
-      setStatus('Round complete! Starting next round...', 'success');
-    } else if (localState.hasSubmittedThisRound) {
-      setStatus('Waiting for other players...', 'info');
+    if (gameState.gameOver) {
+      const winnerName = gameState.winner ? gameState.winner.name : 'Niemand';
+      setStatus(`Spiel vorbei! Sieger: ${winnerName}`, 'success');
+      renderGameSummary();
+      if (!localState.gameOverShown) {
+        openGameOverModal();
+        localState.gameOverShown = true;
+      }
+    } else if (gameState.gameMode === 'competitive') {
+      // Competitive mode status messages
+      if (gameState.competitiveRound && gameState.competitiveRound.roundComplete) {
+        setStatus('Round complete! Starting next round...', 'success');
+      } else if (localState.hasSubmittedThisRound) {
+        setStatus('Waiting for other players...', 'info');
+      } else {
+        setStatus('Place your word and submit!', 'info');
+      }
+      localState.gameOverShown = false;
+    } else if (localState.isMyTurn) {
+      setStatus('Du bist am Zug!', 'info');
+      localState.gameOverShown = false;
     } else {
-      setStatus('Place your word and submit!', 'info');
+      const cur = gameState.players[gameState.currentPlayerIndex];
+      setStatus(`Warte auf ${cur ? cur.name : '...'}`, 'info');
+      localState.gameOverShown = false;
     }
-    localState.gameOverShown = false;
-  } else if (localState.isMyTurn) {
-    setStatus('Du bist am Zug!', 'info');
-    localState.gameOverShown = false;
-  } else {
-    const cur = gameState.players[gameState.currentPlayerIndex];
-    setStatus(`Warte auf ${cur ? cur.name : '...'}`, 'info');
-    localState.gameOverShown = false;
+  } catch (e) {
+    console.error('Error rendering game:', e);
+    setStatus('UI Error: ' + e.message, 'error');
   }
 }
 
 function renderBoard() {
+  if (!gameState.board || !Array.isArray(gameState.board)) {
+    console.warn('Board data missing or invalid, attempting to recreate...');
+    gameState.board = createBoard();
+  }
+
   const fragment = document.createDocumentFragment();
-  // Safe copy for display
-  const displayBoard = gameState.board.map(row => row.map(cell => ({ ...cell })))
+  // Safe copy for display with validation
+  const displayBoard = gameState.board.map(row => Array.isArray(row) ? row.map(cell => ({ ...cell })) : []);
 
   localState.placements.forEach(({ row, col, tile }) => {
     displayBoard[row][col] = {

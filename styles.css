@@ -820,7 +820,7 @@ body::before {
   position: relative;
   aspect-ratio: 1/1;
   border-radius: 8px;
-  padding: 6px;
+  padding: 3px;
   background: var(--board-bg);
   border: 1px solid var(--board-grid);
   display: flex;
@@ -847,31 +847,28 @@ body::before {
 }
 
 .board-cell-letter {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--tile-text);
-  /* Ensure letter is black */
   line-height: 1;
-  /* Fix vertical alignment */
 }
 
 .board-cell-score {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: var(--tile-text);
-  /* Match the letter color (black) */
   position: absolute;
-  top: 2px;
-  right: 3px;
+  top: 1px;
+  right: 2px;
   font-weight: 600;
 }
 
 .board-cell.has-letter {
   background: var(--tile-bg);
-  border: 3px solid #D4C5A9;
+  border: 1.5px solid #C5B89A;
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.08);
   border-radius: 6px;
 }
 
@@ -881,10 +878,11 @@ body::before {
 
 .board-cell.new-letter {
   border-color: var(--accent);
+  border-width: 2px;
   box-shadow:
-    0 0 0 2px rgba(255, 107, 107, 0.4),
-    0 4px 8px rgba(255, 107, 107, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 0 0 1.5px rgba(255, 107, 107, 0.3),
+    0 2px 6px rgba(255, 107, 107, 0.2),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.2);
   animation: tilePulse 0.6s ease-out;
 }
 
@@ -904,11 +902,11 @@ body::before {
 
 .board-cell.locked-letter {
   background: var(--cell-locked);
-  border: 3px solid #C5B89A;
+  border: 1.5px solid #B5A88A;
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.06);
 }
 
 .cell-word2 {
@@ -1051,7 +1049,7 @@ body::before {
 .tile-btn {
   background: var(--tile-bg);
   color: var(--tile-text);
-  border: 3px solid #D4C5A9;
+  border: 2px solid #C5B89A;
   border-radius: 12px;
   min-width: 52px;
   min-height: 52px;
@@ -1062,9 +1060,9 @@ body::before {
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 3px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
@@ -1082,19 +1080,20 @@ body::before {
 }
 
 .tile-btn:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
 
 .tile-btn.selected {
   border-color: var(--accent);
+  border-width: 2px;
   box-shadow:
-    0 0 0 3px rgba(255, 107, 107, 0.3),
-    0 6px 16px rgba(255, 107, 107, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 0 0 2px rgba(255, 107, 107, 0.3),
+    0 4px 12px rgba(255, 107, 107, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
 }
 
@@ -1558,11 +1557,11 @@ button:not(:disabled):hover {
   /* Ensure tiles always keep their background and border */
   .board-cell.has-letter {
     background: var(--tile-bg) !important;
-    border: 2px solid #D4C5A9 !important;
+    border: 1.5px solid #C5B89A !important;
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+      0 1px 2px rgba(0, 0, 0, 0.12),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.08) !important;
   }
 
   /* Improve label visibility on mobile */

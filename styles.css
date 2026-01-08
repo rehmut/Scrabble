@@ -819,7 +819,7 @@ body::before {
 .board-cell {
   position: relative;
   aspect-ratio: 1/1;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 3px;
   background: var(--board-bg);
   border: 1px solid var(--board-grid);
@@ -869,7 +869,7 @@ body::before {
     0 1px 3px rgba(0, 0, 0, 0.12),
     inset 0 0.5px 0 rgba(255, 255, 255, 0.2),
     inset 0 -0.5px 0 rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
+  border-radius: 3px;
 }
 
 .board-cell.has-letter::before {
@@ -1050,7 +1050,7 @@ body::before {
   background: var(--tile-bg);
   color: var(--tile-text);
   border: 2px solid #C5B89A;
-  border-radius: 12px;
+  border-radius: 6px;
   min-width: 52px;
   min-height: 52px;
   aspect-ratio: 1 / 1;
@@ -1526,7 +1526,7 @@ button:not(:disabled):hover {
   .board-cell {
     aspect-ratio: 1/1;
     min-height: 0;
-    border-radius: 0;
+    border-radius: 2px;
     padding: 0;
     font-size: 0.75rem;
     background: var(--board-bg);

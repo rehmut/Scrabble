@@ -14,7 +14,7 @@ const firebaseConfig = {
 const BOARD_SIZE = 15;
 const RACK_SIZE = 7;
 const BINGO_BONUS = 50;
-const EXPIRATION_MS = 1 * 60 * 60 * 1000; // 1 hour
+const EXPIRATION_MS = 20 * 60 * 60 * 1000; // 20 hours
 const COMPETITIVE_TIMER_DURATION = 30000; // 30 seconds
 const ROOM_BROWSER_REFRESH_INTERVAL = 10000; // 10 seconds
 const REMOTE_DICTIONARY_SOURCES = [
@@ -246,12 +246,20 @@ function bindEvents() {
   // Theme support
   const themeSelector = document.getElementById('themeSelector');
   if (themeSelector) {
-    const savedTheme = localStorage.getItem('scrabbleTheme') || 'classic';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    const savedTheme = localStorage.getItem('scrabbleTheme') || 'light';
+    if (savedTheme === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
     themeSelector.value = savedTheme;
     themeSelector.addEventListener('change', (e) => {
       const t = e.target.value;
-      document.documentElement.setAttribute('data-theme', t);
+      if (t === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', t);
+      }
       localStorage.setItem('scrabbleTheme', t);
     });
   }
@@ -357,8 +365,9 @@ function handleJoinGame() {
 }
 
 function joinExistingGame(data, playerName, passwordInput) {
-  // Check for expiration
-  if (data.lastActive && (Date.now() - data.lastActive > EXPIRATION_MS)) {
+  // Check for expiration - only expire if no plays have been made AND room is inactive
+  const hasPlaysBeenMade = (data.turn && data.turn > 1) || (data.moves && data.moves.length > 0);
+  if (!hasPlaysBeenMade && data.lastActive && (Date.now() - data.lastActive > EXPIRATION_MS)) {
     if (confirm('Dieses Spiel ist seit über 20 Stunden inaktiv. Möchtest du ein neues Spiel unter dieser ID starten?')) {
       createNewGame(playerName, data.maxPlayers, passwordInput);
     } else {
@@ -804,6 +813,8 @@ function renderHistory() {
 
 function maybeEndByTiles() {
   if (gameState.gameOver) return;
+  // Only applies to standard mode - competitive mode has its own ending logic
+  if (gameState.gameMode === 'competitive') return;
   const bagEmpty = (gameState.bag || []).length === 0;
   if (!bagEmpty) return;
   const outIdx = (gameState.players || []).findIndex(p => (p.rack || []).length === 0);
@@ -1365,8 +1376,8 @@ function calculateScore(board, wordInfo, placements) {
 function finishGameRemote(reason, pIdx, passedHistory) {
   const players = [...gameState.players];
   let deduction = 0;
-  players.forEach(p => { const s = p.rack.reduce((a, b) => a + b.value, 0); p.score -= s; deduction += s; });
-  if (pIdx !== undefined) players[pIdx].score += deduction;
+  players.forEach(p => { const s = (p.rack || []).reduce((a, b) => a + (b.value || 0), 0); p.score -= s; deduction += s; });
+  if (pIdx !== undefined && players[pIdx]) players[pIdx].score += deduction;
   players.sort((a, b) => b.score - a.score);
   const w = players[0];
   const hist = passedHistory ? [...passedHistory] : [...(gameState.history || [])];
@@ -1882,8 +1893,7 @@ function loadPublicRooms() {
 
   publicRoomsRef
     .orderByChild('lastActive')
-    .startAt(cutoffTime)
-    .limitToLast(20)
+    .limitToLast(50)
     .once('value')
     .then(snapshot => {
       const rooms = [];
@@ -1891,7 +1901,11 @@ function loadPublicRooms() {
         const gameId = childSnapshot.key;
         const data = childSnapshot.val();
 
-        if (data.players < data.maxPlayers && data.lastActive > cutoffTime) {
+        // Keep room if: has plays made, OR is recently active (within expiration time)
+        const hasPlaysBeenMade = (data.turn && data.turn > 1);
+        const isRecentlyActive = data.lastActive > cutoffTime;
+
+        if (data.players < data.maxPlayers && (hasPlaysBeenMade || isRecentlyActive)) {
           rooms.push({ gameId, ...data });
         }
       });
@@ -2167,14 +2181,16 @@ function processCompetitiveRound() {
 function startNextCompetitiveRound() {
   const bag = [...(gameState.bag || [])];
 
-  if (bag.length < 7) {
+  // Only end game when bag is completely empty
+  if (bag.length === 0) {
     finishCompetitiveGame();
     return;
   }
 
-  // Generate new shared tiles
+  // Generate new shared tiles - use all remaining tiles if less than 7
   const sharedTiles = [];
-  for (let i = 0; i < 7 && bag.length > 0; i++) {
+  const tilesToDraw = Math.min(7, bag.length);
+  for (let i = 0; i < tilesToDraw; i++) {
     const idx = Math.floor(Math.random() * bag.length);
     sharedTiles.push(bag.splice(idx, 1)[0]);
   }

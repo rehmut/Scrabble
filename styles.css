@@ -1434,8 +1434,8 @@ button:not(:disabled):hover {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--board-grid);
+  background: var(--bg-panel-alt);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -1461,9 +1461,9 @@ button:not(:disabled):hover {
 }
 
 .chat-bubble.theirs {
-  background: var(--bg-panel-alt);
+  background: var(--bg-panel);
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--board-grid);
   align-self: flex-start;
   border-bottom-left-radius: 2px;
 }
@@ -1484,9 +1484,13 @@ button:not(:disabled):hover {
   flex: 1;
   padding: 10px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--bg-panel);
+  border: 1px solid var(--board-grid);
+  color: var(--text);
+}
+
+.chat-input-area input::placeholder {
+  color: var(--text-muted);
 }
 
 /* Kick Button */
@@ -1701,11 +1705,28 @@ button:not(:disabled):hover {
   flex: 1;
 }
 
+/* Theme Selector */
+.theme-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--board-grid);
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+
+.theme-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 /* Floating Room Browser Button */
 .floating-room-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 12px;
+  right: 12px;
   background: linear-gradient(135deg, var(--accent-secondary) 0%, #3DBDB4 100%);
   color: #FFFFFF;
   font-family: 'Fredoka', sans-serif;
@@ -1943,15 +1964,15 @@ button:not(:disabled):hover {
 @media (max-width: 768px) {
   .floating-room-btn,
   .floating-chat-btn {
-    right: 20px;
+    right: 12px;
   }
 
   .floating-room-btn {
-    bottom: 80px; /* Stack above chat button */
+    bottom: 72px; /* Stack above chat button */
   }
 
   .floating-chat-btn {
-    bottom: 20px;
+    bottom: 12px;
   }
 
   .competitive-panel {

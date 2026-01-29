@@ -781,6 +781,12 @@ function renderPlayers() {
       pill.innerHTML = `<span class="score-pill-name">${player.name}</span><span class="score-pill-value">${player.score}</span>`;
       stripFragment.appendChild(pill);
     });
+    if (gameState.gameMode === 'competitive' && gameState.competitiveRound) {
+      const timerPill = document.createElement('div');
+      timerPill.className = 'score-pill score-pill-timer';
+      timerPill.innerHTML = '<span class="score-pill-name">Timer</span><span id="compTimerHeader" class="score-pill-value competitive-timer--compact">--:--</span>';
+      stripFragment.appendChild(timerPill);
+    }
     elements.scoreStrip.appendChild(stripFragment);
   }
   const cur = gameState.players[gameState.currentPlayerIndex];
@@ -827,8 +833,26 @@ function renderGameSummary() {
   elements.gameOverWinner.textContent = `Sieger: ${winnerName}`;
 
   elements.gameOverSummary.innerHTML = '';
-  const moves = (gameState.moves || []).filter(m => m.type === 'play');
-  if (moves.length === 0) {
+  const moves = (gameState.moves || []).filter(m => m.type === 'play' || m.type === 'competitive_round');
+  const players = gameState.players || [];
+  const deductions = new Map();
+  let totalDeduction = 0;
+  const showDeductions = gameState.gameMode !== 'competitive';
+
+  players.forEach(player => {
+    const deduction = showDeductions
+      ? (player.rack || []).reduce((sum, tile) => sum + (tile.value || 0), 0)
+      : 0;
+    deductions.set(player.id, deduction);
+    totalDeduction += deduction;
+  });
+
+  const bonusPlayer = totalDeduction > 0 && showDeductions
+    ? players.find(player => (player.rack || []).length === 0)
+    : null;
+  const bonusPlayerId = bonusPlayer ? bonusPlayer.id : null;
+
+  if (moves.length === 0 && totalDeduction === 0) {
     const empty = document.createElement('p');
     empty.className = 'game-over-empty';
     empty.textContent = 'Keine Zugdaten vorhanden.';
@@ -838,14 +862,19 @@ function renderGameSummary() {
 
   const movesByPlayer = new Map();
   moves.forEach(move => {
-    if (!movesByPlayer.has(move.playerId)) movesByPlayer.set(move.playerId, []);
-    movesByPlayer.get(move.playerId).push(move);
+    const playerId = move.playerId || move.winnerId;
+    if (!playerId) return;
+    if (!movesByPlayer.has(playerId)) movesByPlayer.set(playerId, []);
+    movesByPlayer.get(playerId).push(move);
   });
 
   const playerOrder = (gameState.players || []).map(player => ({ id: player.id, name: player.name }));
   movesByPlayer.forEach((list, playerId) => {
     if (!playerOrder.some(player => player.id === playerId)) {
-      playerOrder.push({ id: playerId, name: (list[0] && list[0].playerName) ? list[0].playerName : 'Spieler' });
+      const fallbackName = (list[0] && (list[0].playerName || list[0].winnerName))
+        ? (list[0].playerName || list[0].winnerName)
+        : 'Spieler';
+      playerOrder.push({ id: playerId, name: fallbackName });
     }
   });
 
@@ -858,7 +887,10 @@ function renderGameSummary() {
     title.textContent = player.name;
     section.appendChild(title);
 
-    if (playerMoves.length === 0) {
+    const deduction = deductions.get(player.id) || 0;
+    const hasBonus = bonusPlayerId === player.id && totalDeduction > 0;
+
+    if (playerMoves.length === 0 && deduction === 0 && !hasBonus) {
       const empty = document.createElement('p');
       empty.className = 'game-over-empty';
       empty.textContent = 'Keine Zuege gespielt.';
@@ -890,6 +922,28 @@ function renderGameSummary() {
       row.append(wordsCell, pointsCell);
       tbody.appendChild(row);
     });
+
+    if (deduction > 0) {
+      const row = document.createElement('tr');
+      const wordsCell = document.createElement('td');
+      const pointsCell = document.createElement('td');
+      pointsCell.className = 'points';
+      wordsCell.textContent = 'Reststeine Abzug';
+      pointsCell.textContent = `-${deduction}`;
+      row.append(wordsCell, pointsCell);
+      tbody.appendChild(row);
+    }
+
+    if (hasBonus) {
+      const row = document.createElement('tr');
+      const wordsCell = document.createElement('td');
+      const pointsCell = document.createElement('td');
+      pointsCell.className = 'points';
+      wordsCell.textContent = 'Reststeine Bonus';
+      pointsCell.textContent = `+${totalDeduction}`;
+      row.append(wordsCell, pointsCell);
+      tbody.appendChild(row);
+    }
     section.appendChild(table);
     elements.gameOverSummary.appendChild(section);
   });
@@ -1288,8 +1342,20 @@ function validateMove() {
   const sameCol = cols.every(c => c === cols[0]);
   if (!sameRow && !sameCol) return { valid: false, message: 'Nicht in einer Linie.' };
 
-  const orient = sameRow ? 'row' : 'col';
+  let orient = sameRow ? 'row' : 'col';
   const boardHasTiles = gameState.board.some(r => r.some(c => c.locked));
+
+  if (placements.length === 1) {
+    const rowWord = collectWord(tempBoard, placements[0].row, placements[0].col, 'row');
+    const colWord = collectWord(tempBoard, placements[0].row, placements[0].col, 'col');
+    if (rowWord.letters.length > 1 && colWord.letters.length === 1) {
+      orient = 'row';
+    } else if (colWord.letters.length > 1 && rowWord.letters.length === 1) {
+      orient = 'col';
+    } else if (rowWord.letters.length > 1 && colWord.letters.length > 1) {
+      orient = rowWord.letters.length >= colWord.letters.length ? 'row' : 'col';
+    }
+  }
 
   const { contiguous, touchesConnection } = checkContiguity(tempBoard, placements, orient, boardHasTiles);
   if (!contiguous) return { valid: false, message: 'Lücken im Wort.' };
@@ -2072,6 +2138,22 @@ function handleCompetitiveSubmit() {
   });
 }
 
+function setCompetitiveTimerText(text, isActive = false) {
+  const timerEls = [
+    document.getElementById('compTimer'),
+    document.getElementById('compTimerHeader')
+  ].filter(Boolean);
+
+  timerEls.forEach(el => {
+    el.textContent = text;
+    if (isActive) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+}
+
 function startCompetitiveTimer() {
   const round = gameState.competitiveRound;
   if (!round || !round.timerStartedAt) return;
@@ -2087,19 +2169,15 @@ function startCompetitiveTimer() {
     const seconds = Math.floor(remaining / 1000);
     const ms = remaining % 1000;
 
-    const timerEl = document.getElementById('compTimer');
-    if (timerEl) {
-      timerEl.textContent = `${seconds}.${Math.floor(ms / 100)}s`;
+    const text = `${seconds}.${Math.floor(ms / 100)}s`;
+    const isActive = remaining > 0 && remaining < 10000;
+    setCompetitiveTimerText(text, isActive);
 
-      if (remaining === 0) {
-        timerEl.classList.remove('active');
-        clearInterval(localState.competitiveTimerInterval);
+    if (remaining === 0) {
+      clearInterval(localState.competitiveTimerInterval);
 
-        if (!round.timerExpired) {
-          gameRef.child('competitiveRound/timerExpired').set(true);
-        }
-      } else if (remaining < 10000) {
-        timerEl.classList.add('active');
+      if (!round.timerExpired) {
+        gameRef.child('competitiveRound/timerExpired').set(true);
       }
     }
   }, 100);
@@ -2110,6 +2188,17 @@ function stopCompetitiveTimer() {
     clearInterval(localState.competitiveTimerInterval);
     localState.competitiveTimerInterval = null;
   }
+}
+
+function getUnusedCompetitiveTiles(round, winningSubmission) {
+  if (!round || !Array.isArray(round.sharedTiles)) return [];
+  const usedIds = new Set();
+  if (winningSubmission && Array.isArray(winningSubmission.placements)) {
+    winningSubmission.placements.forEach(p => {
+      if (p.tile && p.tile.id) usedIds.add(p.tile.id);
+    });
+  }
+  return round.sharedTiles.filter(tile => tile && !usedIds.has(tile.id));
 }
 
 function processCompetitiveRound() {
@@ -2127,12 +2216,14 @@ function processCompetitiveRound() {
   });
 
   if (!winnerId) {
-    startNextCompetitiveRound();
+    const unusedTiles = getUnusedCompetitiveTiles(round, null);
+    startNextCompetitiveRound(unusedTiles);
     return;
   }
 
   const winningSubmission = round.submissions[winnerId];
   const winner = gameState.players.find(p => p.id === winnerId);
+  const unusedTiles = getUnusedCompetitiveTiles(round, winningSubmission);
 
   // Apply winning placements to board
   const updates = {};
@@ -2159,8 +2250,10 @@ function processCompetitiveRound() {
   moveLog.push({
     type: 'competitive_round',
     roundNumber: round.roundNumber,
+    playerId: winnerId,
     winnerId: winnerId,
     winnerName: winner.name,
+    playerName: winner.name,
     words: winningSubmission.words,
     moveScore: maxScore,
     turn: gameState.turn
@@ -2174,12 +2267,21 @@ function processCompetitiveRound() {
   updates['lastActive'] = Date.now();
 
   gameRef.update(updates).then(() => {
-    setTimeout(() => startNextCompetitiveRound(), 3000);
+    setTimeout(() => startNextCompetitiveRound(unusedTiles), 3000);
   });
 }
 
-function startNextCompetitiveRound() {
+function startNextCompetitiveRound(returnedTiles = []) {
   const bag = [...(gameState.bag || [])];
+  if (returnedTiles.length) {
+    const bagIds = new Set(bag.map(tile => tile.id));
+    returnedTiles.forEach(tile => {
+      if (tile && tile.id && !bagIds.has(tile.id)) {
+        bagIds.add(tile.id);
+        bag.push(tile);
+      }
+    });
+  }
 
   // Only end game when bag is completely empty
   if (bag.length === 0) {
@@ -2257,11 +2359,7 @@ function renderCompetitivePanel() {
     startCompetitiveTimer();
   } else {
     stopCompetitiveTimer();
-    const timerEl = document.getElementById('compTimer');
-    if (timerEl) {
-      timerEl.textContent = round.roundComplete ? 'Complete' : '--:--';
-      timerEl.classList.remove('active');
-    }
+    setCompetitiveTimerText(round.roundComplete ? 'Complete' : '--:--', false);
   }
 
   // Update submissions status

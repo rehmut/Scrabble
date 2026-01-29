@@ -402,6 +402,25 @@ body::before {
   background: rgba(93, 224, 230, 0.15);
 }
 
+.score-pill-timer {
+  border-color: rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.score-pill-timer .score-pill-name {
+  color: var(--danger);
+}
+
+.competitive-timer--compact {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--danger);
+}
+
+.competitive-timer--compact.active {
+  animation: timerPulse 1s infinite;
+}
+
 .toolbar-btn {
   border-radius: 20px;
   border: 2px solid #FFE5D9;
